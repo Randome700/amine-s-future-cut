@@ -25,9 +25,9 @@ const DashboardPage = () => {
     }
   };
 
-  // Sort reservations by date (nearest first)
+  // Sort reservations by date (earliest first) and filter out invalid dates
   const sortedReservations = [...reservations]
-    .filter((r) => r.status !== 'completed')
+    .filter((r) => r.status !== 'completed' && r.date instanceof Date && !isNaN(r.date.getTime()))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
   // Calculate total earnings
