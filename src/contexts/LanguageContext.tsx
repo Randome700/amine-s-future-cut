@@ -1,0 +1,178 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+type Language = 'fr' | 'ar';
+
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: string) => string;
+  isRTL: boolean;
+}
+
+const translations: Record<Language, Record<string, string>> = {
+  fr: {
+    // Navigation
+    'nav.home': 'Accueil',
+    'nav.reservation': 'Réservation',
+    'nav.shop': 'Boutique',
+    
+    // Home
+    'home.hero.title': 'Amine Barbershop',
+    'home.hero.subtitle': 'L\'art de la coiffure masculine',
+    'home.hero.cta': 'Réserver maintenant',
+    'home.hours': 'Horaires d\'ouverture',
+    'home.hours.value': '7/7 — 09:00 → 22:00',
+    'home.barbers': 'Nos Barbiers',
+    
+    // Reservation
+    'reservation.title': 'Réservation',
+    'reservation.chairs': 'État des Chaises',
+    'reservation.available': 'Disponible',
+    'reservation.busy': 'Occupé',
+    'reservation.services': 'Services',
+    'reservation.haircut': 'Coupe de cheveux',
+    'reservation.beard': 'Barbe',
+    'reservation.hairbeard': 'Cheveux + Barbe',
+    'reservation.styling': 'Coiffage',
+    'reservation.protein': 'Protéine / Coloration',
+    'reservation.private': 'Prix sur demande',
+    'reservation.total': 'Total',
+    'reservation.time': 'Temps estimé',
+    'reservation.price': 'Prix',
+    'reservation.selectBarber': 'Choisir un barbier',
+    'reservation.selectDate': 'Date',
+    'reservation.selectTime': 'Heure',
+    'reservation.phone': 'Numéro de téléphone',
+    'reservation.phonePlaceholder': '+216 XX XXX XXX',
+    'reservation.submit': 'Confirmer la réservation',
+    'reservation.wait': 'Temps d\'attente estimé',
+    'reservation.minutes': 'min',
+    'reservation.autoSwitch': 'Barbier auto-assigné (le vôtre est occupé)',
+    'reservation.error.past': 'La date/heure ne peut pas être dans le passé',
+    'reservation.error.soon': 'Réservez au moins 30 minutes à l\'avance',
+    'reservation.error.closed': 'Hors des heures d\'ouverture (09:00-22:00)',
+    'reservation.error.phone': 'Numéro tunisien invalide',
+    'reservation.error.existing': 'Une réservation existe déjà pour ce numéro',
+    'reservation.success': 'Réservation confirmée !',
+    
+    // Shop
+    'shop.title': 'Boutique',
+    'shop.coming': 'Bientôt disponible',
+    'shop.comingDesc': 'Notre boutique en ligne arrive prochainement avec des produits premium pour hommes.',
+    
+    // Dashboard
+    'dashboard.title': 'Tableau de bord',
+    'dashboard.password': 'Mot de passe',
+    'dashboard.enter': 'Entrer',
+    'dashboard.reservations': 'Réservations',
+    'dashboard.earnings': 'Revenus du jour',
+    'dashboard.cancel': 'Annuler',
+    'dashboard.noshow': 'Absent',
+    'dashboard.chairs': 'État des Chaises',
+    
+    // Footer
+    'footer.follow': 'Suivez-nous',
+    'footer.contact': 'Contact',
+    
+    // Common
+    'common.tnd': 'TND',
+  },
+  ar: {
+    // Navigation
+    'nav.home': 'الرئيسية',
+    'nav.reservation': 'الحجز',
+    'nav.shop': 'المتجر',
+    
+    // Home
+    'home.hero.title': 'أمين باربرشوب',
+    'home.hero.subtitle': 'فن حلاقة الرجال',
+    'home.hero.cta': 'احجز الآن',
+    'home.hours': 'ساعات العمل',
+    'home.hours.value': '7/7 — 09:00 ← 22:00',
+    'home.barbers': 'حلاقونا',
+    
+    // Reservation
+    'reservation.title': 'الحجز',
+    'reservation.chairs': 'حالة الكراسي',
+    'reservation.available': 'متاح',
+    'reservation.busy': 'مشغول',
+    'reservation.services': 'الخدمات',
+    'reservation.haircut': 'قص الشعر',
+    'reservation.beard': 'اللحية',
+    'reservation.hairbeard': 'الشعر + اللحية',
+    'reservation.styling': 'تصفيف',
+    'reservation.protein': 'بروتين / صبغة',
+    'reservation.private': 'السعر عند الطلب',
+    'reservation.total': 'المجموع',
+    'reservation.time': 'الوقت المقدر',
+    'reservation.price': 'السعر',
+    'reservation.selectBarber': 'اختر حلاقاً',
+    'reservation.selectDate': 'التاريخ',
+    'reservation.selectTime': 'الوقت',
+    'reservation.phone': 'رقم الهاتف',
+    'reservation.phonePlaceholder': '+216 XX XXX XXX',
+    'reservation.submit': 'تأكيد الحجز',
+    'reservation.wait': 'وقت الانتظار المقدر',
+    'reservation.minutes': 'دقيقة',
+    'reservation.autoSwitch': 'تم تعيين حلاق آخر (حلاقك مشغول)',
+    'reservation.error.past': 'لا يمكن أن يكون التاريخ/الوقت في الماضي',
+    'reservation.error.soon': 'احجز قبل 30 دقيقة على الأقل',
+    'reservation.error.closed': 'خارج ساعات العمل (09:00-22:00)',
+    'reservation.error.phone': 'رقم تونسي غير صالح',
+    'reservation.error.existing': 'يوجد حجز بهذا الرقم',
+    'reservation.success': 'تم تأكيد الحجز!',
+    
+    // Shop
+    'shop.title': 'المتجر',
+    'shop.coming': 'قريباً',
+    'shop.comingDesc': 'متجرنا الإلكتروني قادم قريباً مع منتجات فاخرة للرجال.',
+    
+    // Dashboard
+    'dashboard.title': 'لوحة التحكم',
+    'dashboard.password': 'كلمة المرور',
+    'dashboard.enter': 'دخول',
+    'dashboard.reservations': 'الحجوزات',
+    'dashboard.earnings': 'أرباح اليوم',
+    'dashboard.cancel': 'إلغاء',
+    'dashboard.noshow': 'غائب',
+    'dashboard.chairs': 'حالة الكراسي',
+    
+    // Footer
+    'footer.follow': 'تابعونا',
+    'footer.contact': 'اتصل بنا',
+    
+    // Common
+    'common.tnd': 'دينار',
+  },
+};
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+  const [language, setLanguage] = useState<Language>('fr');
+
+  useEffect(() => {
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = language;
+  }, [language]);
+
+  const t = (key: string): string => {
+    return translations[language][key] || key;
+  };
+
+  const isRTL = language === 'ar';
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t, isRTL }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+};

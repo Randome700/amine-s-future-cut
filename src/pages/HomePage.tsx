@@ -1,0 +1,135 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Button } from '@/components/ui/button';
+import { Clock, Users, Scissors, ArrowRight } from 'lucide-react';
+
+const barbers = [
+  { name: 'Amine', role: 'Master Barber', image: '👨‍🦱' },
+  { name: 'Motez', role: 'Senior Stylist', image: '👨‍🦰' },
+  { name: 'Rayan', role: 'Barber', image: '🧔' },
+  { name: 'Anas', role: 'Barber', image: '🧑‍🦱' },
+];
+
+const HomePage = () => {
+  const { t } = useLanguage();
+
+  return (
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-primary/5 rounded-full blur-2xl animate-float" style={{ animationDelay: '2s' }} />
+        
+        <div className="container mx-auto px-4 relative z-10 pt-20">
+          <div className="max-w-3xl mx-auto text-center space-y-8">
+            {/* Logo */}
+            <div className="animate-scale-in">
+              <img 
+                src="https://i.ibb.co/gb8QqfN6/Chat-GPT-Image-Dec-17-2025-07-01-22-PM.png" 
+                alt="Amine Barbershop" 
+                className="h-32 w-32 mx-auto rounded-full object-cover glow-box animate-pulse-glow"
+              />
+            </div>
+
+            {/* Title */}
+            <div className="space-y-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
+                <span className="gradient-text">{t('home.hero.title')}</span>
+              </h1>
+              <p className="text-xl md:text-2xl text-muted-foreground">
+                {t('home.hero.subtitle')}
+              </p>
+            </div>
+
+            {/* CTA Button */}
+            <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+              <Link to="/reservation">
+                <Button size="lg" className="btn-primary-glow text-lg px-8 py-6 rounded-full group">
+                  {t('home.hero.cta')}
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Opening Hours */}
+            <div className="animate-slide-up pt-8" style={{ animationDelay: '0.6s' }}>
+              <div className="glass-card inline-flex items-center gap-3 px-6 py-4 rounded-full">
+                <Clock className="h-5 w-5 text-primary" />
+                <div className="text-left">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('home.hours')}</p>
+                  <p className="font-medium">{t('home.hours.value')}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-primary rounded-full mt-2 animate-pulse" />
+          </div>
+        </div>
+      </section>
+
+      {/* Barbers Section */}
+      <section className="py-24 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('home.barbers')}</h2>
+            <div className="flex items-center justify-center gap-2 text-muted-foreground">
+              <Users className="h-5 w-5" />
+              <span>4 {t('home.barbers').toLowerCase()}</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+            {barbers.map((barber, index) => (
+              <div 
+                key={barber.name}
+                className="glass-card-hover p-6 rounded-2xl text-center animate-slide-up"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="text-5xl mb-4">{barber.image}</div>
+                <h3 className="font-semibold text-lg">{barber.name}</h3>
+                <p className="text-sm text-muted-foreground">{barber.role}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-24">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {[
+              { icon: Scissors, title: 'Expert Cuts', desc: 'Precision styling by masters' },
+              { icon: Clock, title: 'Quick Service', desc: 'Respect your time' },
+              { icon: Users, title: '4 Barbers', desc: 'Minimal wait times' },
+            ].map((feature, index) => (
+              <div 
+                key={feature.title}
+                className="glass-card p-8 rounded-2xl text-center group hover:border-primary/30 transition-all duration-300 animate-slide-up"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <feature.icon className="h-7 w-7 text-primary" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default HomePage;
