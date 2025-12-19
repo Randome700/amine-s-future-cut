@@ -15,6 +15,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.home': 'Accueil',
     'nav.reservation': 'Réservation',
     'nav.shop': 'Boutique',
+    'nav.dashboard': 'Dashboard',
     
     // Home
     'home.hero.title': 'Amine Barbershop',
@@ -82,6 +83,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.home': 'الرئيسية',
     'nav.reservation': 'الحجز',
     'nav.shop': 'المتجر',
+    'nav.dashboard': 'لوحة التحكم',
     
     // Home
     'home.hero.title': 'أمين باربرشوب',
