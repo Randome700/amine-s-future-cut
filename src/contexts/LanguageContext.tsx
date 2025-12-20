@@ -56,6 +56,8 @@ const translations: Record<Language, Record<string, string>> = {
     'reservation.error.closed': 'Hors des heures d\'ouverture (09:00-22:00)',
     'reservation.error.phone': 'Numéro tunisien invalide',
     'reservation.error.existing': 'Une réservation existe déjà pour ce numéro',
+    'reservation.error.barberBusy': 'Ce barbier est déjà réservé à cette heure. Veuillez choisir un autre barbier ou une autre heure.',
+    'reservation.error.allBusy': 'Tous les barbiers sont réservés à cette heure. Veuillez choisir une autre heure.',
     'reservation.success': 'Réservation confirmée !',
     
     // Shop
@@ -126,6 +128,8 @@ const translations: Record<Language, Record<string, string>> = {
     'reservation.error.closed': 'خارج ساعات العمل (09:00-22:00)',
     'reservation.error.phone': 'رقم تونسي غير صالح',
     'reservation.error.existing': 'يوجد حجز بهذا الرقم',
+    'reservation.error.barberBusy': 'هذا الحلاق محجوز في هذا الوقت. يرجى اختيار حلاق آخر أو وقت آخر.',
+    'reservation.error.allBusy': 'جميع الحلاقين محجوزون في هذا الوقت. يرجى اختيار وقت آخر.',
     'reservation.success': 'تم تأكيد الحجز!',
     
     // Shop
