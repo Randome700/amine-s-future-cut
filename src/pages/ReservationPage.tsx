@@ -47,6 +47,7 @@ const ReservationPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [phone, setPhone] = useState('');
+  const [clientName, setClientName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [autoSwitched, setAutoSwitched] = useState(false);
 
@@ -121,6 +122,11 @@ const ReservationPage = () => {
       return;
     }
 
+    if (!clientName.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+
     if (!selectedBarber) {
       setError('Please select a barber');
       return;
@@ -160,6 +166,7 @@ const ReservationPage = () => {
     const chairNumber = chairs.findIndex((c) => c.barber === finalBarber) + 1;
 
     addReservation({
+      clientName: clientName.trim(),
       phone,
       barber: finalBarber,
       services: selectedServices,
@@ -180,6 +187,7 @@ const ReservationPage = () => {
     setSelectedDate(undefined);
     setSelectedTime('');
     setPhone('');
+    setClientName('');
   };
 
   const hasPrivateService = selectedServices.includes('protein');
@@ -259,10 +267,28 @@ const ReservationPage = () => {
             {/* Booking Form */}
             <div className="glass-card p-6 rounded-2xl animate-slide-up" style={{ animationDelay: '0.3s' }}>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Barber Selection */}
+                {/* Client Name */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary text-sm">2</span>
+                    {t('reservation.clientName')}
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      value={clientName}
+                      onChange={(e) => setClientName(e.target.value)}
+                      placeholder={t('reservation.clientNamePlaceholder')}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+
+                {/* Barber Selection */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary text-sm">3</span>
                     {t('reservation.selectBarber')}
                   </Label>
                   <Select value={selectedBarber} onValueChange={setSelectedBarber}>
@@ -301,7 +327,7 @@ const ReservationPage = () => {
                 {/* Date Selection */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
-                    <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary text-sm">3</span>
+                    <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary text-sm">4</span>
                     {t('reservation.selectDate')}
                   </Label>
                   <Popover>
@@ -320,7 +346,11 @@ const ReservationPage = () => {
                         mode="single"
                         selected={selectedDate}
                         onSelect={setSelectedDate}
-                        disabled={(date) => date < new Date()}
+                        disabled={(date) => {
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          return date < today;
+                        }}
                         initialFocus
                       />
                     </PopoverContent>
@@ -330,7 +360,7 @@ const ReservationPage = () => {
                 {/* Time Selection */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
-                    <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary text-sm">4</span>
+                    <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary text-sm">5</span>
                     {t('reservation.selectTime')}
                   </Label>
                   <Select value={selectedTime} onValueChange={setSelectedTime}>
@@ -350,7 +380,7 @@ const ReservationPage = () => {
                 {/* Phone Number */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
-                    <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary text-sm">5</span>
+                    <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary text-sm">6</span>
                     {t('reservation.phone')}
                   </Label>
                   <div className="relative">
