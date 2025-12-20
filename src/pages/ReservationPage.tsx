@@ -40,7 +40,7 @@ const timeSlots = Array.from({ length: 26 }, (_, i) => {
 
 const ReservationPage = () => {
   const { t, language } = useLanguage();
-  const { addReservation, hasActiveReservation, getWaitTime, chairs } = useReservation();
+  const { addReservation, hasActiveReservation, getWaitTime, chairs, isBarberBusyAt, getAvailableBarberAt } = useReservation();
 
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedBarber, setSelectedBarber] = useState<string>('');
@@ -132,6 +132,11 @@ const ReservationPage = () => {
       return;
     }
 
+    if (!selectedDate || !selectedTime) {
+      setError('Please select a date and time');
+      return;
+    }
+
     const dateTimeError = validateDateTime();
     if (dateTimeError) {
       setError(dateTimeError);
@@ -148,27 +153,32 @@ const ReservationPage = () => {
       return;
     }
 
-    // Check if selected barber is busy, auto-switch if needed
-    let finalBarber = selectedBarber;
-    const selectedBarberChair = chairs.find((c) => c.barber === selectedBarber);
-    if (selectedBarberChair?.status === 'busy') {
-      const availableBarber = chairs.find((c) => c.status === 'available');
-      if (availableBarber) {
-        finalBarber = availableBarber.barber;
-        setAutoSwitched(true);
+    const [hours, minutes] = selectedTime.split(':').map(Number);
+    const dateTime = new Date(selectedDate);
+    dateTime.setHours(hours, minutes, 0, 0);
+
+    // Check if selected barber is busy at the requested time
+    if (isBarberBusyAt(selectedBarber, dateTime, totalTime)) {
+      // Check if ALL barbers are busy at this time
+      const availableBarber = getAvailableBarberAt(dateTime, totalTime);
+      
+      if (availableBarber === null) {
+        // All 4 chairs are busy at this time
+        setError(t('reservation.error.allBusy'));
+        return;
+      } else {
+        // The selected barber is busy, but others are available
+        setError(t('reservation.error.barberBusy'));
+        return;
       }
     }
 
-    const [hours, minutes] = selectedTime.split(':').map(Number);
-    const dateTime = new Date(selectedDate!);
-    dateTime.setHours(hours, minutes, 0, 0);
-
-    const chairNumber = chairs.findIndex((c) => c.barber === finalBarber) + 1;
+    const chairNumber = chairs.findIndex((c) => c.barber === selectedBarber) + 1;
 
     addReservation({
       clientName: clientName.trim(),
       phone,
-      barber: finalBarber,
+      barber: selectedBarber,
       services: selectedServices,
       date: dateTime,
       totalTime,
@@ -178,7 +188,7 @@ const ReservationPage = () => {
     });
 
     toast.success(t('reservation.success'), {
-      description: `${finalBarber} - ${format(dateTime, 'PPp', { locale: language === 'ar' ? arSA : fr })}`,
+      description: `${selectedBarber} - ${format(dateTime, 'PPp', { locale: language === 'ar' ? arSA : fr })}`,
     });
 
     // Reset form

@@ -29,6 +29,8 @@ interface ReservationContextType {
   updateReservationStatus: (id: string, status: Reservation['status']) => Promise<void>;
   getWaitTime: (barber: string) => number;
   hasActiveReservation: (phone: string) => boolean;
+  isBarberBusyAt: (barber: string, dateTime: Date, duration: number) => boolean;
+  getAvailableBarberAt: (dateTime: Date, duration: number) => string | null;
   loading: boolean;
   totalEarnings: number;
   todayEarnings: number;
@@ -198,6 +200,33 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  // Check if a barber has a conflicting reservation at the given time
+  const isBarberBusyAt = (barber: string, dateTime: Date, duration: number): boolean => {
+    const requestedStart = dateTime.getTime();
+    const requestedEnd = requestedStart + duration * 60000;
+
+    return reservations.some((r) => {
+      if (r.barber !== barber) return false;
+      if (r.status === 'cancelled' || r.status === 'noshow') return false;
+
+      const reservationStart = r.date.getTime();
+      const reservationEnd = reservationStart + r.totalTime * 60000;
+
+      // Check for overlap
+      return requestedStart < reservationEnd && requestedEnd > reservationStart;
+    });
+  };
+
+  // Find an available barber at the given time, returns null if all are busy
+  const getAvailableBarberAt = (dateTime: Date, duration: number): string | null => {
+    for (const barber of barbers) {
+      if (!isBarberBusyAt(barber, dateTime, duration)) {
+        return barber;
+      }
+    }
+    return null;
+  };
+
   return (
     <ReservationContext.Provider
       value={{
@@ -207,6 +236,8 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
         updateReservationStatus,
         getWaitTime,
         hasActiveReservation,
+        isBarberBusyAt,
+        getAvailableBarberAt,
         loading,
         totalEarnings,
         todayEarnings,
