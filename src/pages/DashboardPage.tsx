@@ -3,14 +3,14 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useReservation } from '@/contexts/ReservationContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Lock, Calendar, Clock, Phone, User, DollarSign, XCircle, UserX } from 'lucide-react';
+import { Lock, Calendar, Clock, Phone, User, DollarSign, XCircle, UserX, TrendingUp, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr, arSA } from 'date-fns/locale';
 import ChairStatusDisplay from '@/components/ChairStatusDisplay';
 
 const DashboardPage = () => {
   const { t, language } = useLanguage();
-  const { reservations, updateReservationStatus } = useReservation();
+  const { reservations, updateReservationStatus, loading, totalEarnings, todayEarnings } = useReservation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -27,13 +27,8 @@ const DashboardPage = () => {
 
   // Sort reservations by date (earliest first) and filter out invalid dates
   const sortedReservations = [...reservations]
-    .filter((r) => r.status !== 'completed' && r.date instanceof Date && !isNaN(r.date.getTime()))
+    .filter((r) => r.status !== 'completed' && r.status !== 'cancelled' && r.status !== 'noshow' && r.date instanceof Date && !isNaN(r.date.getTime()))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
-
-  // Calculate total earnings
-  const totalEarnings = reservations
-    .filter((r) => r.status === 'confirmed' || r.status === 'completed')
-    .reduce((acc, r) => acc + r.totalPrice, 0);
 
   if (!isAuthenticated) {
     return (
@@ -69,6 +64,14 @@ const DashboardPage = () => {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pt-24 pb-12">
       <div className="container mx-auto px-4">
@@ -76,11 +79,22 @@ const DashboardPage = () => {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 animate-slide-up">
             <h1 className="text-3xl font-bold gradient-text">{t('dashboard.title')}</h1>
-            <div className="glass-card px-6 py-3 rounded-xl flex items-center gap-3">
-              <DollarSign className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-xs text-muted-foreground">{t('dashboard.earnings')}</p>
-                <p className="text-xl font-bold text-primary">{totalEarnings} TND</p>
+            
+            {/* Earnings Cards */}
+            <div className="flex gap-4">
+              <div className="glass-card px-6 py-3 rounded-xl flex items-center gap-3">
+                <DollarSign className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground">{t('dashboard.earnings')}</p>
+                  <p className="text-xl font-bold text-primary">{todayEarnings} TND</p>
+                </div>
+              </div>
+              <div className="glass-card px-6 py-3 rounded-xl flex items-center gap-3">
+                <TrendingUp className="h-5 w-5 text-success" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Total</p>
+                  <p className="text-xl font-bold text-success">{totalEarnings} TND</p>
+                </div>
               </div>
             </div>
           </div>
@@ -95,6 +109,9 @@ const DashboardPage = () => {
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
               {t('dashboard.reservations')}
+              <span className="text-sm font-normal text-muted-foreground">
+                ({sortedReservations.length})
+              </span>
             </h2>
 
             <div className="space-y-4">
@@ -134,9 +151,9 @@ const DashboardPage = () => {
                           </div>
 
                           <div className="space-y-1">
+                            {/* Client Name */}
                             <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">{reservation.barber}</span>
+                              <span className="font-semibold text-lg">{reservation.clientName}</span>
                               <span className={`text-xs px-2 py-0.5 rounded-full ${
                                 reservation.status === 'confirmed'
                                   ? 'bg-success/20 text-success'
@@ -147,19 +164,27 @@ const DashboardPage = () => {
                                 {reservation.status}
                               </span>
                             </div>
+                            {/* Barber */}
+                            <div className="flex items-center gap-2 text-sm">
+                              <User className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-muted-foreground">Barbier:</span>
+                              <span className="font-medium">{reservation.barber}</span>
+                            </div>
+                            {/* Phone */}
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <Phone className="h-3 w-3" />
                               <span>{reservation.phone}</span>
                             </div>
+                            {/* Time & Price */}
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <Clock className="h-3 w-3" />
                               <span>{reservation.totalTime} min</span>
                               <span>•</span>
-                              <span>{reservation.totalPrice} TND</span>
+                              <span className="text-primary font-medium">{reservation.totalPrice} TND</span>
                             </div>
                             {timeUntil > 0 && (
-                              <p className="text-xs text-primary">
-                                In {timeUntil} min
+                              <p className="text-xs text-primary font-medium">
+                                Dans {timeUntil} min
                               </p>
                             )}
                           </div>
