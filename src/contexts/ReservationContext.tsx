@@ -94,7 +94,7 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
   const cleanupExpiredReservations = useCallback(async () => {
     const now = new Date();
     
-    // Get all reservations that are expired (30 min after service ends)
+    // Get all reservations
     const { data: allReservations, error } = await supabase
       .from('reservations')
       .select('*');
@@ -111,12 +111,13 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
       const serviceEndTime = new Date(reservationDate.getTime() + r.total_time * 60000);
       const deleteAfterTime = new Date(serviceEndTime.getTime() + 30 * 60000); // 30 min after service ends
       
-      // Delete if 30 min after service ends
-      if (now >= deleteAfterTime && (r.status === 'confirmed' || r.status === 'completed')) {
+      // Delete if 30 min after service ends (for confirmed, completed, or pending reservations)
+      if (now >= deleteAfterTime) {
         idsToDelete.push(r.id);
+        continue; // Skip other checks if already marked for deletion
       }
       
-      // Also delete if reservation date was yesterday (end of day cleanup)
+      // Also delete if reservation date was from a previous day (end of day cleanup)
       const reservationDay = new Date(reservationDate);
       reservationDay.setHours(0, 0, 0, 0);
       const today = new Date();
@@ -127,16 +128,21 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
       }
     }
 
-    if (idsToDelete.length > 0) {
+    // Remove duplicates
+    const uniqueIds = [...new Set(idsToDelete)];
+
+    if (uniqueIds.length > 0) {
       const { error: deleteError } = await supabase
         .from('reservations')
         .delete()
-        .in('id', idsToDelete);
+        .in('id', uniqueIds);
       
       if (deleteError) {
         console.error('Error deleting expired reservations:', deleteError);
       } else {
-        console.log(`Cleaned up ${idsToDelete.length} expired reservations`);
+        console.log(`Cleaned up ${uniqueIds.length} expired reservations`);
+        // Refetch to update UI immediately
+        fetchReservations();
       }
     }
   }, []);
