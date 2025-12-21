@@ -178,6 +178,7 @@ const translations: Record<Language, Record<string, string>> = {
   },
 };
 
+// Language context for i18n
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
