@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useReservation } from '@/contexts/ReservationContext';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import ChairStatusDisplay from '@/components/ChairStatusDisplay';
-import { CalendarIcon, Clock, Phone, AlertCircle, CheckCircle, User } from 'lucide-react';
+import { CalendarIcon, Clock, Phone, AlertCircle, CheckCircle, User, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr, arSA } from 'date-fns/locale';
 
@@ -40,7 +40,7 @@ const timeSlots = Array.from({ length: 26 }, (_, i) => {
 
 const ReservationPage = () => {
   const { t, language } = useLanguage();
-  const { addReservation, hasActiveReservation, getWaitTime, chairs, isBarberBusyAt, getAvailableBarberAt } = useReservation();
+  const { addReservation, hasActiveReservation, getWaitTime, chairs, isBarberBusyAt, getAvailableBarberAt, cancelReservation, reservations, isPhoneBanned } = useReservation();
 
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedBarber, setSelectedBarber] = useState<string>('');
@@ -50,6 +50,9 @@ const ReservationPage = () => {
   const [clientName, setClientName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [autoSwitched, setAutoSwitched] = useState(false);
+  const [cancelPhone, setCancelPhone] = useState('');
+  const [showCancelForm, setShowCancelForm] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   const { totalTime, totalPrice } = useMemo(() => {
     let time = 0;
@@ -111,7 +114,7 @@ const ReservationPage = () => {
     return null;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setAutoSwitched(false);
@@ -145,6 +148,13 @@ const ReservationPage = () => {
 
     if (!validatePhone(phone)) {
       setError(t('reservation.error.phone'));
+      return;
+    }
+
+    // Check if phone is banned
+    const banned = await isPhoneBanned(phone);
+    if (banned) {
+      setError(t('reservation.error.banned'));
       return;
     }
 
@@ -200,6 +210,41 @@ const ReservationPage = () => {
     setClientName('');
   };
 
+  const handleCancelReservation = async () => {
+    setCancelError(null);
+
+    if (!validatePhone(cancelPhone)) {
+      setCancelError(t('reservation.error.phone'));
+      return;
+    }
+
+    // Find the reservation for this phone
+    const reservation = reservations.find(
+      (r) => r.phone === cancelPhone && (r.status === 'pending' || r.status === 'confirmed')
+    );
+
+    if (!reservation) {
+      setCancelError(t('reservation.cancel.notFound'));
+      return;
+    }
+
+    const result = await cancelReservation(reservation.id, cancelPhone);
+
+    if (result.success) {
+      toast.success(t('reservation.cancel.success'));
+      setCancelPhone('');
+      setShowCancelForm(false);
+    } else {
+      if (result.error === 'banned') {
+        setCancelError(t('reservation.cancel.banned'));
+      } else if (result.error === 'past_reservation') {
+        setCancelError(t('reservation.cancel.pastReservation'));
+      } else {
+        setCancelError(t('reservation.cancel.error'));
+      }
+    }
+  };
+
   const hasPrivateService = selectedServices.includes('protein');
 
   return (
@@ -216,6 +261,49 @@ const ReservationPage = () => {
           {/* Chair Status */}
           <div className="mb-12 animate-slide-up" style={{ animationDelay: '0.1s' }}>
             <ChairStatusDisplay />
+          </div>
+
+          {/* Cancel Reservation Section */}
+          <div className="mb-8 animate-slide-up" style={{ animationDelay: '0.15s' }}>
+            <div className="glass-card p-4 rounded-xl">
+              <Button
+                variant="outline"
+                onClick={() => setShowCancelForm(!showCancelForm)}
+                className="w-full flex items-center justify-center gap-2 text-destructive hover:bg-destructive/10"
+              >
+                <XCircle className="h-4 w-4" />
+                {t('reservation.cancel.title')}
+              </Button>
+              
+              {showCancelForm && (
+                <div className="mt-4 space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    {t('reservation.cancel.warning')}
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      type="tel"
+                      value={cancelPhone}
+                      onChange={(e) => setCancelPhone(e.target.value)}
+                      placeholder={t('reservation.phonePlaceholder')}
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={handleCancelReservation}
+                      variant="destructive"
+                    >
+                      {t('reservation.cancel.confirm')}
+                    </Button>
+                  </div>
+                  {cancelError && (
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+                      <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                      <span>{cancelError}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

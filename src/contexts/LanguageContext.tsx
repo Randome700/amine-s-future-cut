@@ -58,7 +58,18 @@ const translations: Record<Language, Record<string, string>> = {
     'reservation.error.existing': 'Une réservation existe déjà pour ce numéro',
     'reservation.error.barberBusy': 'Ce barbier est déjà réservé à cette heure. Veuillez choisir un autre barbier ou une autre heure.',
     'reservation.error.allBusy': 'Tous les barbiers sont réservés à cette heure. Veuillez choisir une autre heure.',
+    'reservation.error.banned': 'Vous êtes banni pendant 24h pour avoir annulé deux fois.',
     'reservation.success': 'Réservation confirmée !',
+    
+    // Cancellation
+    'reservation.cancel.title': 'Annuler ma réservation',
+    'reservation.cancel.warning': 'Attention : Vous ne pouvez annuler qu\'une seule fois. Une deuxième annulation entraînera un bannissement de 24h.',
+    'reservation.cancel.confirm': 'Annuler',
+    'reservation.cancel.success': 'Réservation annulée avec succès. Les autres réservations ont été avancées.',
+    'reservation.cancel.notFound': 'Aucune réservation trouvée pour ce numéro.',
+    'reservation.cancel.banned': 'Vous êtes banni pendant 24h pour avoir annulé deux fois.',
+    'reservation.cancel.pastReservation': 'Vous ne pouvez pas annuler une réservation passée.',
+    'reservation.cancel.error': 'Erreur lors de l\'annulation.',
     
     // Shop
     'shop.title': 'Boutique',
@@ -130,7 +141,18 @@ const translations: Record<Language, Record<string, string>> = {
     'reservation.error.existing': 'يوجد حجز بهذا الرقم',
     'reservation.error.barberBusy': 'هذا الحلاق محجوز في هذا الوقت. يرجى اختيار حلاق آخر أو وقت آخر.',
     'reservation.error.allBusy': 'جميع الحلاقين محجوزون في هذا الوقت. يرجى اختيار وقت آخر.',
+    'reservation.error.banned': 'تم حظرك لمدة 24 ساعة بسبب إلغاء حجزين.',
     'reservation.success': 'تم تأكيد الحجز!',
+    
+    // Cancellation
+    'reservation.cancel.title': 'إلغاء حجزي',
+    'reservation.cancel.warning': 'تحذير: يمكنك الإلغاء مرة واحدة فقط. الإلغاء الثاني سيؤدي إلى حظر لمدة 24 ساعة.',
+    'reservation.cancel.confirm': 'إلغاء',
+    'reservation.cancel.success': 'تم إلغاء الحجز بنجاح. تم تقديم الحجوزات الأخرى.',
+    'reservation.cancel.notFound': 'لم يتم العثور على حجز بهذا الرقم.',
+    'reservation.cancel.banned': 'تم حظرك لمدة 24 ساعة بسبب إلغاء حجزين.',
+    'reservation.cancel.pastReservation': 'لا يمكنك إلغاء حجز سابق.',
+    'reservation.cancel.error': 'خطأ أثناء الإلغاء.',
     
     // Shop
     'shop.title': 'المتجر',

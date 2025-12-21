@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Reservation {
@@ -22,15 +22,24 @@ export interface ChairStatus {
   busyUntil?: Date;
 }
 
+interface CancellationRecord {
+  id: string;
+  phone: string;
+  cancelled_at: string;
+  banned_until: string | null;
+}
+
 interface ReservationContextType {
   reservations: Reservation[];
   chairs: ChairStatus[];
   addReservation: (reservation: Omit<Reservation, 'id'>) => Promise<void>;
   updateReservationStatus: (id: string, status: Reservation['status']) => Promise<void>;
+  cancelReservation: (id: string, phone: string) => Promise<{ success: boolean; error?: string }>;
   getWaitTime: (barber: string) => number;
   hasActiveReservation: (phone: string) => boolean;
   isBarberBusyAt: (barber: string, dateTime: Date, duration: number) => boolean;
   getAvailableBarberAt: (dateTime: Date, duration: number) => string | null;
+  isPhoneBanned: (phone: string) => Promise<boolean>;
   loading: boolean;
   totalEarnings: number;
   todayEarnings: number;
@@ -81,6 +90,57 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
     })
     .reduce((acc, r) => acc + r.totalPrice, 0);
 
+  // Cleanup expired reservations (30 min after service ends or end of day)
+  const cleanupExpiredReservations = useCallback(async () => {
+    const now = new Date();
+    
+    // Get all reservations that are expired (30 min after service ends)
+    const { data: allReservations, error } = await supabase
+      .from('reservations')
+      .select('*');
+    
+    if (error) {
+      console.error('Error fetching reservations for cleanup:', error);
+      return;
+    }
+
+    const idsToDelete: string[] = [];
+    
+    for (const r of allReservations || []) {
+      const reservationDate = new Date(r.reservation_date);
+      const serviceEndTime = new Date(reservationDate.getTime() + r.total_time * 60000);
+      const deleteAfterTime = new Date(serviceEndTime.getTime() + 30 * 60000); // 30 min after service ends
+      
+      // Delete if 30 min after service ends
+      if (now >= deleteAfterTime && (r.status === 'confirmed' || r.status === 'completed')) {
+        idsToDelete.push(r.id);
+      }
+      
+      // Also delete if reservation date was yesterday (end of day cleanup)
+      const reservationDay = new Date(reservationDate);
+      reservationDay.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (reservationDay < today) {
+        idsToDelete.push(r.id);
+      }
+    }
+
+    if (idsToDelete.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('reservations')
+        .delete()
+        .in('id', idsToDelete);
+      
+      if (deleteError) {
+        console.error('Error deleting expired reservations:', deleteError);
+      } else {
+        console.log(`Cleaned up ${idsToDelete.length} expired reservations`);
+      }
+    }
+  }, []);
+
   // Fetch reservations from database
   const fetchReservations = async () => {
     try {
@@ -115,9 +175,15 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Set up realtime subscription
+  // Set up realtime subscription and cleanup interval
   useEffect(() => {
     fetchReservations();
+    cleanupExpiredReservations(); // Run cleanup on mount
+
+    // Run cleanup every minute
+    const cleanupInterval = setInterval(() => {
+      cleanupExpiredReservations();
+    }, 60000);
 
     const channel = supabase
       .channel('reservations-changes')
@@ -135,9 +201,10 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
       .subscribe();
 
     return () => {
+      clearInterval(cleanupInterval);
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [cleanupExpiredReservations]);
 
   const addReservation = async (reservation: Omit<Reservation, 'id'>) => {
     try {
@@ -177,6 +244,126 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error('Error updating reservation:', error);
       throw error;
+    }
+  };
+
+  // Check if phone is banned (has cancelled before and is within 24h ban period)
+  const isPhoneBanned = async (phone: string): Promise<boolean> => {
+    const { data, error } = await supabase
+      .from('cancellation_records')
+      .select('*')
+      .eq('phone', phone);
+
+    if (error) {
+      console.error('Error checking ban status:', error);
+      return false;
+    }
+
+    if (!data || data.length === 0) return false;
+
+    // Check if there's an active ban
+    const now = new Date();
+    const activeBan = data.find((record: CancellationRecord) => {
+      if (record.banned_until) {
+        return new Date(record.banned_until) > now;
+      }
+      return false;
+    });
+
+    return !!activeBan;
+  };
+
+  // Cancel reservation with ban logic and shifting
+  const cancelReservation = async (id: string, phone: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      // Check if phone is banned
+      const banned = await isPhoneBanned(phone);
+      if (banned) {
+        return { success: false, error: 'banned' };
+      }
+
+      // Check if this phone has cancelled before
+      const { data: previousCancellations, error: fetchError } = await supabase
+        .from('cancellation_records')
+        .select('*')
+        .eq('phone', phone);
+
+      if (fetchError) {
+        console.error('Error fetching cancellation records:', fetchError);
+        return { success: false, error: 'database_error' };
+      }
+
+      // Get the reservation to be cancelled
+      const reservationToCancel = reservations.find((r) => r.id === id);
+      if (!reservationToCancel) {
+        return { success: false, error: 'not_found' };
+      }
+
+      // Check if the reservation is in the future
+      const now = new Date();
+      if (reservationToCancel.date <= now) {
+        return { success: false, error: 'past_reservation' };
+      }
+
+      const cancelledServiceTime = reservationToCancel.totalTime;
+      const barber = reservationToCancel.barber;
+      const cancelledDate = reservationToCancel.date;
+
+      // If this is the second cancellation, ban for 24 hours
+      if (previousCancellations && previousCancellations.length >= 1) {
+        const banUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
+        await supabase.from('cancellation_records').insert({
+          phone,
+          banned_until: banUntil.toISOString(),
+        });
+      } else {
+        // Record the first cancellation
+        await supabase.from('cancellation_records').insert({
+          phone,
+        });
+      }
+
+      // Delete the cancelled reservation
+      const { error: deleteError } = await supabase
+        .from('reservations')
+        .delete()
+        .eq('id', id);
+
+      if (deleteError) {
+        console.error('Error deleting reservation:', deleteError);
+        return { success: false, error: 'delete_error' };
+      }
+
+      // Shift all later reservations for the same barber on the same day earlier
+      const sameDayReservations = reservations.filter((r) => {
+        if (r.id === id) return false;
+        if (r.barber !== barber) return false;
+        if (r.status === 'cancelled' || r.status === 'noshow') return false;
+        
+        const rDate = new Date(r.date);
+        const cancelDate = new Date(cancelledDate);
+        
+        // Same day check
+        return rDate.toDateString() === cancelDate.toDateString() && rDate > cancelledDate;
+      });
+
+      // Sort by date ascending
+      sameDayReservations.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+      // Shift each reservation earlier by the cancelled service time
+      for (const r of sameDayReservations) {
+        const newDate = new Date(r.date.getTime() - cancelledServiceTime * 60000);
+        
+        await supabase
+          .from('reservations')
+          .update({ reservation_date: newDate.toISOString() })
+          .eq('id', r.id);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error cancelling reservation:', error);
+      return { success: false, error: 'unknown_error' };
     }
   };
 
@@ -234,10 +421,12 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
         chairs,
         addReservation,
         updateReservationStatus,
+        cancelReservation,
         getWaitTime,
         hasActiveReservation,
         isBarberBusyAt,
         getAvailableBarberAt,
+        isPhoneBanned,
         loading,
         totalEarnings,
         todayEarnings,

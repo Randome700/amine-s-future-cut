@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      cancellation_records: {
+        Row: {
+          banned_until: string | null
+          cancelled_at: string
+          id: string
+          phone: string
+        }
+        Insert: {
+          banned_until?: string | null
+          cancelled_at?: string
+          id?: string
+          phone: string
+        }
+        Update: {
+          banned_until?: string | null
+          cancelled_at?: string
+          id?: string
+          phone?: string
+        }
+        Relationships: []
+      }
       reservations: {
         Row: {
           barber: string
