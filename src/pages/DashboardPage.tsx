@@ -17,7 +17,7 @@ const DashboardPage = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'amine') {
+    if (password === 'amine.2026') {
       setIsAuthenticated(true);
       setError('');
     } else {
