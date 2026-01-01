@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useReservation } from '@/contexts/ReservationContext';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -10,8 +11,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import ChairStatusDisplay from '@/components/ChairStatusDisplay';
-import { CalendarIcon, Clock, Phone, AlertCircle, CheckCircle, User, XCircle } from 'lucide-react';
-import { format } from 'date-fns';
+import { CalendarIcon, Clock, Phone, AlertCircle, CheckCircle, User, XCircle, Info } from 'lucide-react';
+import { format, addMinutes } from 'date-fns';
 import { fr, arSA } from 'date-fns/locale';
 
 interface Service {
@@ -41,6 +42,7 @@ const timeSlots = Array.from({ length: 26 }, (_, i) => {
 const ReservationPage = () => {
   const { t, language } = useLanguage();
   const { addReservation, hasActiveReservation, getWaitTime, chairs, isBarberBusyAt, getAvailableBarberAt, cancelReservation, reservations, isPhoneBanned } = useReservation();
+  const [searchParams] = useSearchParams();
 
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedBarber, setSelectedBarber] = useState<string>('');
@@ -50,9 +52,20 @@ const ReservationPage = () => {
   const [clientName, setClientName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [autoSwitched, setAutoSwitched] = useState(false);
+  const [autoSwitchedBarber, setAutoSwitchedBarber] = useState<string>('');
+  const [suggestedTime, setSuggestedTime] = useState<string | null>(null);
   const [cancelPhone, setCancelPhone] = useState('');
   const [showCancelForm, setShowCancelForm] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+
+  // Pre-select barber from URL parameter
+  useEffect(() => {
+    const barberParam = searchParams.get('barber');
+    if (barberParam && barbers.includes(barberParam)) {
+      setSelectedBarber(barberParam);
+      toast.success(t('reservation.barberPreselected').replace('{barber}', barberParam));
+    }
+  }, [searchParams, t]);
 
   const { totalTime, totalPrice } = useMemo(() => {
     let time = 0;
@@ -114,10 +127,40 @@ const ReservationPage = () => {
     return null;
   };
 
+  // Find next available time slot for any barber
+  const findNextAvailableTime = (startDateTime: Date, duration: number): { time: string; barber: string } | null => {
+    const checkTime = new Date(startDateTime);
+    
+    // Check up to 4 hours ahead
+    for (let i = 0; i < 16; i++) {
+      const hours = checkTime.getHours();
+      const minutes = checkTime.getMinutes();
+      
+      // Only check during opening hours
+      if (hours >= 9 && hours < 22) {
+        for (const barber of barbers) {
+          if (!isBarberBusyAt(barber, checkTime, duration)) {
+            return {
+              time: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`,
+              barber
+            };
+          }
+        }
+      }
+      
+      // Add 30 minutes
+      checkTime.setMinutes(checkTime.getMinutes() + 30);
+    }
+    
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setAutoSwitched(false);
+    setAutoSwitchedBarber('');
+    setSuggestedTime(null);
 
     // Validation
     if (selectedServices.length === 0) {
@@ -167,28 +210,39 @@ const ReservationPage = () => {
     const dateTime = new Date(selectedDate);
     dateTime.setHours(hours, minutes, 0, 0);
 
+    let finalBarber = selectedBarber;
+
     // Check if selected barber is busy at the requested time
     if (isBarberBusyAt(selectedBarber, dateTime, totalTime)) {
-      // Check if ALL barbers are busy at this time
+      // Try to find another available barber at this time
       const availableBarber = getAvailableBarberAt(dateTime, totalTime);
       
-      if (availableBarber === null) {
-        // All 4 chairs are busy at this time
-        setError(t('reservation.error.allBusy'));
-        return;
+      if (availableBarber) {
+        // Auto-assign to available barber
+        finalBarber = availableBarber;
+        setAutoSwitched(true);
+        setAutoSwitchedBarber(availableBarber);
+        toast.info(t('reservation.autoSwitch').replace('{barber}', availableBarber));
       } else {
-        // The selected barber is busy, but others are available
-        setError(t('reservation.error.barberBusy'));
+        // All barbers are busy - suggest next available time
+        const nextSlot = findNextAvailableTime(dateTime, totalTime);
+        
+        if (nextSlot) {
+          setSuggestedTime(nextSlot.time);
+          setError(t('reservation.error.allBusySuggestion').replace('{time}', nextSlot.time).replace('{barber}', nextSlot.barber));
+        } else {
+          setError(t('reservation.error.allBusy'));
+        }
         return;
       }
     }
 
-    const chairNumber = chairs.findIndex((c) => c.barber === selectedBarber) + 1;
+    const chairNumber = chairs.findIndex((c) => c.barber === finalBarber) + 1;
 
     addReservation({
       clientName: clientName.trim(),
       phone,
-      barber: selectedBarber,
+      barber: finalBarber,
       services: selectedServices,
       date: dateTime,
       totalTime,
@@ -198,7 +252,7 @@ const ReservationPage = () => {
     });
 
     toast.success(t('reservation.success'), {
-      description: `${selectedBarber} - ${format(dateTime, 'PPp', { locale: language === 'ar' ? arSA : fr })}`,
+      description: `${finalBarber} - ${format(dateTime, 'PPp', { locale: language === 'ar' ? arSA : fr })}`,
     });
 
     // Reset form
@@ -208,6 +262,8 @@ const ReservationPage = () => {
     setSelectedTime('');
     setPhone('');
     setClientName('');
+    setAutoSwitched(false);
+    setAutoSwitchedBarber('');
   };
 
   const handleCancelReservation = async () => {

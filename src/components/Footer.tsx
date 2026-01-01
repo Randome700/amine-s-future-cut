@@ -6,9 +6,9 @@ const Footer = () => {
   const { t } = useLanguage();
 
   const socialLinks = [
-    { name: 'Taz', url: 'https://instagram.com/taz', handle: '@taz' },
-    { name: 'Anas', url: 'https://instagram.com/anas', handle: '@anas' },
-    { name: 'Amine', url: 'https://instagram.com/amine', handle: '@amine' },
+    { name: 'Taz', url: 'https://www.instagram.com/taz_coiff_', handle: '@taz_coiff_' },
+    { name: 'Anas', url: 'https://www.instagram.com/melkki_anas', handle: '@melkki_anas' },
+    { name: 'Amine', url: 'https://www.instagram.com/coif_amin', handle: '@coif_amin' },
   ];
 
   return (
