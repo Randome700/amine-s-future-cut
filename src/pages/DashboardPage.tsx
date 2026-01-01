@@ -8,6 +8,19 @@ import { format } from 'date-fns';
 import { fr, arSA } from 'date-fns/locale';
 import ChairStatusDisplay from '@/components/ChairStatusDisplay';
 
+// Format duration in human-readable hours/minutes
+const formatDuration = (minutes: number): string => {
+  if (minutes < 60) {
+    return `${minutes}min`;
+  }
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  if (remainingMinutes === 0) {
+    return `${hours}h`;
+  }
+  return `${hours}h ${remainingMinutes}min`;
+};
+
 const DashboardPage = () => {
   const { t, language } = useLanguage();
   const { reservations, updateReservationStatus, loading, totalEarnings, todayEarnings } = useReservation();
@@ -178,7 +191,7 @@ const DashboardPage = () => {
                             {/* Time & Price */}
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <Clock className="h-3 w-3" />
-                              <span>{reservation.totalTime} min</span>
+                              <span>{formatDuration(reservation.totalTime)}</span>
                               <span>•</span>
                               <span className="text-primary font-medium">{reservation.totalPrice} TND</span>
                             </div>

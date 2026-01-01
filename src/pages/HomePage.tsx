@@ -1,8 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Clock, Users, Scissors, ArrowRight } from 'lucide-react';
+import { Clock, Users, Scissors, ArrowRight, MapPin } from 'lucide-react';
 
 const barbers = [
   { name: 'Amine', role: 'Master Barber', image: '👨‍🦱' },
@@ -13,6 +13,11 @@ const barbers = [
 
 const HomePage = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+
+  const handleBarberClick = (barberName: string) => {
+    navigate(`/reservation?barber=${encodeURIComponent(barberName)}`);
+  };
 
   return (
     <div className="min-h-screen">
@@ -90,16 +95,49 @@ const HomePage = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             {barbers.map((barber, index) => (
-              <div 
+              <button 
                 key={barber.name}
-                className="glass-card-hover p-6 rounded-2xl text-center animate-slide-up"
+                onClick={() => handleBarberClick(barber.name)}
+                className="glass-card-hover p-6 rounded-2xl text-center animate-slide-up cursor-pointer hover:border-primary/50 hover:scale-105 transition-all duration-300"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="text-5xl mb-4">{barber.image}</div>
                 <h3 className="font-semibold text-lg">{barber.name}</h3>
                 <p className="text-sm text-muted-foreground">{barber.role}</p>
-              </div>
+                <p className="text-xs text-primary mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {t('home.hero.cta')} →
+                </p>
+              </button>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Google Maps Section */}
+      <section className="py-24 relative">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('home.location')}</h2>
+            <div className="flex items-center justify-center gap-2 text-muted-foreground">
+              <MapPin className="h-5 w-5 text-primary" />
+              <span>Grombalia, Tunisia</span>
+            </div>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="glass-card p-2 rounded-2xl overflow-hidden">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3200.5!2d10.747759620785171!3d36.46693700447472!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzbCsDI4JzAxLjAiTiAxMMKwNDQnNTIuMCJF!5e0!3m2!1sen!2stn!4v1234567890"
+                width="100%"
+                height="400"
+                style={{ border: 0, borderRadius: '12px' }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Amine Barbershop Location"
+                className="w-full"
+              />
+            </div>
           </div>
         </div>
       </section>

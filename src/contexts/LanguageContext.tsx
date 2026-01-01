@@ -24,6 +24,7 @@ const translations: Record<Language, Record<string, string>> = {
     'home.hours': 'Horaires d\'ouverture',
     'home.hours.value': '7/7 — 09:00 → 22:00',
     'home.barbers': 'Nos Barbiers',
+    'home.location': 'Notre Emplacement',
     
     // Reservation
     'reservation.title': 'Réservation',
@@ -50,7 +51,8 @@ const translations: Record<Language, Record<string, string>> = {
     'reservation.submit': 'Confirmer la réservation',
     'reservation.wait': 'Temps d\'attente estimé',
     'reservation.minutes': 'min',
-    'reservation.autoSwitch': 'Barbier auto-assigné (le vôtre est occupé)',
+    'reservation.autoSwitch': '{barber} est occupé, vous avez été assigné à un autre barbier disponible.',
+    'reservation.barberPreselected': '{barber} a été pré-sélectionné pour vous.',
     'reservation.error.past': 'La date/heure ne peut pas être dans le passé',
     'reservation.error.soon': 'Réservez au moins 30 minutes à l\'avance',
     'reservation.error.closed': 'Hors des heures d\'ouverture (09:00-22:00)',
@@ -58,6 +60,7 @@ const translations: Record<Language, Record<string, string>> = {
     'reservation.error.existing': 'Une réservation existe déjà pour ce numéro',
     'reservation.error.barberBusy': 'Ce barbier est déjà réservé à cette heure. Veuillez choisir un autre barbier ou une autre heure.',
     'reservation.error.allBusy': 'Tous les barbiers sont réservés à cette heure. Veuillez choisir une autre heure.',
+    'reservation.error.allBusySuggestion': 'Tous les barbiers sont occupés à cette heure. Prochaine disponibilité : {time} avec {barber}.',
     'reservation.error.banned': 'Vous êtes banni pendant 24h pour avoir annulé deux fois.',
     'reservation.success': 'Réservation confirmée !',
     
@@ -107,6 +110,7 @@ const translations: Record<Language, Record<string, string>> = {
     'home.hours': 'ساعات العمل',
     'home.hours.value': '7/7 — 09:00 ← 22:00',
     'home.barbers': 'حلاقونا',
+    'home.location': 'موقعنا',
     
     // Reservation
     'reservation.title': 'الحجز',
@@ -133,7 +137,8 @@ const translations: Record<Language, Record<string, string>> = {
     'reservation.submit': 'تأكيد الحجز',
     'reservation.wait': 'وقت الانتظار المقدر',
     'reservation.minutes': 'دقيقة',
-    'reservation.autoSwitch': 'تم تعيين حلاق آخر (حلاقك مشغول)',
+    'reservation.autoSwitch': '{barber} مشغول، تم تعيينك إلى حلاق آخر متاح.',
+    'reservation.barberPreselected': 'تم اختيار {barber} مسبقاً لك.',
     'reservation.error.past': 'لا يمكن أن يكون التاريخ/الوقت في الماضي',
     'reservation.error.soon': 'احجز قبل 30 دقيقة على الأقل',
     'reservation.error.closed': 'خارج ساعات العمل (09:00-22:00)',
@@ -141,6 +146,7 @@ const translations: Record<Language, Record<string, string>> = {
     'reservation.error.existing': 'يوجد حجز بهذا الرقم',
     'reservation.error.barberBusy': 'هذا الحلاق محجوز في هذا الوقت. يرجى اختيار حلاق آخر أو وقت آخر.',
     'reservation.error.allBusy': 'جميع الحلاقين محجوزون في هذا الوقت. يرجى اختيار وقت آخر.',
+    'reservation.error.allBusySuggestion': 'جميع الحلاقين مشغولون في هذا الوقت. التوفر التالي: {time} مع {barber}.',
     'reservation.error.banned': 'تم حظرك لمدة 24 ساعة بسبب إلغاء حجزين.',
     'reservation.success': 'تم تأكيد الحجز!',
     

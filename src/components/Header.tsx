@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Menu, X } from 'lucide-react';
+import { Moon, Sun, Menu, X, Phone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
@@ -30,12 +30,21 @@ const Header = () => {
             <img 
               src="https://i.ibb.co/gb8QqfN6/Chat-GPT-Image-Dec-17-2025-07-01-22-PM.png" 
               alt="Amine Barbershop" 
-              className="h-10 w-10 rounded-full object-cover transition-transform duration-300 group-hover:scale-110"
+              className="h-12 w-12 rounded-full object-cover transition-transform duration-300 group-hover:scale-110"
             />
             <span className="text-lg font-semibold tracking-tight hidden sm:block">
               Amine <span className="text-primary">Barbershop</span>
             </span>
           </Link>
+
+          {/* Phone Number - Desktop */}
+          <a
+            href="tel:+21621632832"
+            className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors text-sm font-medium text-primary"
+          >
+            <Phone className="h-4 w-4" />
+            <span>+216 21 632 832</span>
+          </a>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
