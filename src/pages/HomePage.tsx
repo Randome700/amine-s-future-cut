@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useReservation } from '@/contexts/ReservationContext';
 import { Button } from '@/components/ui/button';
-import { Clock, Users, Scissors, ArrowRight, MapPin } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Clock, Users, Scissors, ArrowRight, MapPin, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 const barbers = [
   { name: 'Amine', role: 'Master Barber', image: '👨‍🦱' },
@@ -14,9 +17,41 @@ const barbers = [
 const HomePage = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { reservations, cancelReservation } = useReservation();
+  const [cancelPhone, setCancelPhone] = useState('');
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const handleBarberClick = (barberName: string) => {
     navigate(`/reservation?barber=${encodeURIComponent(barberName)}`);
+  };
+
+  const handleCancelReservation = async () => {
+    if (!cancelPhone.trim()) {
+      toast.error(t('reservation.cancel.phoneRequired'));
+      return;
+    }
+
+    const reservation = reservations.find(
+      (r) => r.phone === cancelPhone && (r.status === 'pending' || r.status === 'confirmed')
+    );
+
+    if (!reservation) {
+      toast.error(t('reservation.cancel.notFound'));
+      return;
+    }
+
+    setIsCancelling(true);
+    const result = await cancelReservation(reservation.id, cancelPhone);
+    setIsCancelling(false);
+
+    if (result.success) {
+      toast.success(t('reservation.cancel.success'));
+      setCancelPhone('');
+    } else if (result.error === 'banned') {
+      toast.error(t('reservation.cancel.banned'));
+    } else {
+      toast.error(t('reservation.cancel.error'));
+    }
   };
 
   return (
@@ -76,6 +111,38 @@ const HomePage = () => {
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
           <div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex justify-center">
             <div className="w-1 h-3 bg-primary rounded-full mt-2 animate-pulse" />
+          </div>
+        </div>
+      </section>
+
+      {/* Cancel Reservation Section */}
+      <section className="py-12 relative">
+        <div className="container mx-auto px-4">
+          <div className="max-w-md mx-auto glass-card p-6 rounded-2xl animate-slide-up">
+            <div className="text-center mb-4">
+              <h3 className="text-xl font-semibold flex items-center justify-center gap-2">
+                <XCircle className="h-5 w-5 text-destructive" />
+                {t('reservation.cancel.title')}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">{t('reservation.cancel.description')}</p>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                type="tel"
+                placeholder={t('reservation.phone')}
+                value={cancelPhone}
+                onChange={(e) => setCancelPhone(e.target.value)}
+                className="flex-1"
+              />
+              <Button
+                onClick={handleCancelReservation}
+                disabled={isCancelling}
+                variant="destructive"
+                className="whitespace-nowrap"
+              >
+                {isCancelling ? '...' : t('reservation.cancel.button')}
+              </Button>
+            </div>
           </div>
         </div>
       </section>

@@ -43,7 +43,7 @@ const Header = () => {
             className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors text-sm font-medium text-primary"
           >
             <Phone className="h-4 w-4" />
-            <span>+216 21 632 832</span>
+            <span>21 632 832</span>
           </a>
 
           {/* Desktop Navigation */}
