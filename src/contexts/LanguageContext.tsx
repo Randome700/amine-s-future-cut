@@ -73,6 +73,9 @@ const translations: Record<Language, Record<string, string>> = {
     'reservation.cancel.banned': 'Vous êtes banni pendant 24h pour avoir annulé deux fois.',
     'reservation.cancel.pastReservation': 'Vous ne pouvez pas annuler une réservation passée.',
     'reservation.cancel.error': 'Erreur lors de l\'annulation.',
+    'reservation.cancel.phoneRequired': 'Veuillez entrer votre numéro de téléphone.',
+    'reservation.cancel.button': 'Annuler',
+    'reservation.cancel.description': 'Entrez votre numéro pour annuler votre réservation',
     
     // Shop
     'shop.title': 'Boutique',
@@ -159,6 +162,9 @@ const translations: Record<Language, Record<string, string>> = {
     'reservation.cancel.banned': 'تم حظرك لمدة 24 ساعة بسبب إلغاء حجزين.',
     'reservation.cancel.pastReservation': 'لا يمكنك إلغاء حجز سابق.',
     'reservation.cancel.error': 'خطأ أثناء الإلغاء.',
+    'reservation.cancel.phoneRequired': 'يرجى إدخال رقم هاتفك.',
+    'reservation.cancel.button': 'إلغاء',
+    'reservation.cancel.description': 'أدخل رقمك لإلغاء حجزك',
     
     // Shop
     'shop.title': 'المتجر',

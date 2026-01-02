@@ -197,7 +197,7 @@ const DashboardPage = () => {
                             </div>
                             {timeUntil > 0 && (
                               <p className="text-xs text-primary font-medium">
-                                Dans {timeUntil} min
+                                Dans {formatDuration(timeUntil)}
                               </p>
                             )}
                           </div>
