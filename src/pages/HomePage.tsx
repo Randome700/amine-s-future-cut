@@ -187,7 +187,7 @@ const HomePage = () => {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('home.location')}</h2>
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
               <MapPin className="h-5 w-5 text-primary" />
-              <span>Grombalia, Tunisia</span>
+              <span>Nabeul Dar chaaban el fehri</span>
             </div>
           </div>
 
