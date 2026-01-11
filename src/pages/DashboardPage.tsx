@@ -3,11 +3,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useReservation } from '@/contexts/ReservationContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Lock, Calendar, Clock, Phone, User, DollarSign, XCircle, UserX, TrendingUp, Loader2 } from 'lucide-react';
+import { Lock, Calendar, Clock, Phone, User, DollarSign, XCircle, UserX, TrendingUp, Loader2, Volume2, VolumeX } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr, arSA } from 'date-fns/locale';
 import ChairStatusDisplay from '@/components/ChairStatusDisplay';
-
+import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 // Format duration in human-readable hours/minutes
 const formatDuration = (minutes: number): string => {
   if (minutes < 60) {
@@ -27,6 +27,7 @@ const DashboardPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { soundEnabled, toggleSound } = useBookingNotifications();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +92,19 @@ const DashboardPage = () => {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 animate-slide-up">
-            <h1 className="text-3xl font-bold gradient-text">{t('dashboard.title')}</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-3xl font-bold gradient-text">{t('dashboard.title')}</h1>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleSound}
+                className={`flex items-center gap-2 ${soundEnabled ? 'text-primary' : 'text-muted-foreground'}`}
+                title={soundEnabled ? 'Disable notification sound' : 'Enable notification sound'}
+              >
+                {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                <span className="hidden sm:inline">{soundEnabled ? 'Sound On' : 'Sound Off'}</span>
+              </Button>
+            </div>
             
             {/* Earnings Cards */}
             <div className="flex gap-4">
