@@ -48,7 +48,7 @@ export const useBookingNotifications = () => {
     }
   }, [soundEnabled]);
 
-  const sendWhatsAppNotification = useCallback(async (
+  const sendEmailNotification = useCallback(async (
     type: 'new_booking' | 'cancellation',
     reservation: Reservation
   ) => {
@@ -57,10 +57,11 @@ export const useBookingNotifications = () => {
       const dateStr = format(reservationDate, 'dd/MM/yyyy');
       const timeStr = format(reservationDate, 'HH:mm');
 
-      const { error } = await supabase.functions.invoke('send-whatsapp-notification', {
+      const { error } = await supabase.functions.invoke('send-email-notification', {
         body: {
           type,
           client_name: reservation.client_name,
+          barber: reservation.barber,
           services: reservation.services,
           date: dateStr,
           time: timeStr,
@@ -68,12 +69,12 @@ export const useBookingNotifications = () => {
       });
 
       if (error) {
-        console.error('WhatsApp notification error:', error);
+        console.error('Email notification error:', error);
       } else {
-        console.log('WhatsApp notification sent successfully');
+        console.log('Email notification sent successfully');
       }
     } catch (error) {
-      console.error('Failed to send WhatsApp notification:', error);
+      console.error('Failed to send email notification:', error);
     }
   }, []);
 
@@ -103,8 +104,8 @@ export const useBookingNotifications = () => {
             description: `${newReservation.client_name} booked ${newReservation.services.join(', ')}`,
           });
           
-          // Send WhatsApp notification
-          await sendWhatsAppNotification('new_booking', newReservation);
+          // Send email notification
+          await sendEmailNotification('new_booking', newReservation);
         }
       )
       .on(
@@ -132,8 +133,8 @@ export const useBookingNotifications = () => {
               variant: 'destructive',
             });
             
-            // Send WhatsApp notification
-            await sendWhatsAppNotification('cancellation', updatedReservation);
+            // Send email notification
+            await sendEmailNotification('cancellation', updatedReservation);
           }
         }
       )
@@ -158,8 +159,8 @@ export const useBookingNotifications = () => {
             variant: 'destructive',
           });
           
-          // Send WhatsApp notification for deletion
-          await sendWhatsAppNotification('cancellation', deletedReservation);
+          // Send email notification for deletion
+          await sendEmailNotification('cancellation', deletedReservation);
         }
       )
       .subscribe((status) => {
@@ -170,7 +171,7 @@ export const useBookingNotifications = () => {
       console.log('Cleaning up realtime subscription...');
       supabase.removeChannel(channel);
     };
-  }, [playNotificationSound, sendWhatsAppNotification, toast]);
+  }, [playNotificationSound, sendEmailNotification, toast]);
 
   const toggleSound = useCallback(() => {
     setSoundEnabled((prev: boolean) => !prev);

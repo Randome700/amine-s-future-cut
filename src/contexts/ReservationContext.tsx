@@ -253,52 +253,14 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Check if phone is banned (has cancelled before and is within 24h ban period)
-  const isPhoneBanned = async (phone: string): Promise<boolean> => {
-    const { data, error } = await supabase
-      .from('cancellation_records')
-      .select('*')
-      .eq('phone', phone);
-
-    if (error) {
-      console.error('Error checking ban status:', error);
-      return false;
-    }
-
-    if (!data || data.length === 0) return false;
-
-    // Check if there's an active ban
-    const now = new Date();
-    const activeBan = data.find((record: CancellationRecord) => {
-      if (record.banned_until) {
-        return new Date(record.banned_until) > now;
-      }
-      return false;
-    });
-
-    return !!activeBan;
+  // Ban system removed - always return false
+  const isPhoneBanned = async (_phone: string): Promise<boolean> => {
+    return false;
   };
 
-  // Cancel reservation with ban logic and shifting
-  const cancelReservation = async (id: string, phone: string): Promise<{ success: boolean; error?: string }> => {
+  // Cancel reservation with shifting (ban system removed)
+  const cancelReservation = async (id: string, _phone: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Check if phone is banned
-      const banned = await isPhoneBanned(phone);
-      if (banned) {
-        return { success: false, error: 'banned' };
-      }
-
-      // Check if this phone has cancelled before
-      const { data: previousCancellations, error: fetchError } = await supabase
-        .from('cancellation_records')
-        .select('*')
-        .eq('phone', phone);
-
-      if (fetchError) {
-        console.error('Error fetching cancellation records:', fetchError);
-        return { success: false, error: 'database_error' };
-      }
-
       // Get the reservation to be cancelled
       const reservationToCancel = reservations.find((r) => r.id === id);
       if (!reservationToCancel) {
@@ -314,20 +276,6 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
       const cancelledServiceTime = reservationToCancel.totalTime;
       const barber = reservationToCancel.barber;
       const cancelledDate = reservationToCancel.date;
-
-      // If this is the second cancellation, ban for 24 hours
-      if (previousCancellations && previousCancellations.length >= 1) {
-        const banUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
-        await supabase.from('cancellation_records').insert({
-          phone,
-          banned_until: banUntil.toISOString(),
-        });
-      } else {
-        // Record the first cancellation
-        await supabase.from('cancellation_records').insert({
-          phone,
-        });
-      }
 
       // Delete the cancelled reservation
       const { error: deleteError } = await supabase
