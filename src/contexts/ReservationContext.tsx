@@ -22,12 +22,6 @@ export interface ChairStatus {
   busyUntil?: Date;
 }
 
-interface CancellationRecord {
-  id: string;
-  phone: string;
-  cancelled_at: string;
-  banned_until: string | null;
-}
 
 interface ReservationContextType {
   reservations: Reservation[];
