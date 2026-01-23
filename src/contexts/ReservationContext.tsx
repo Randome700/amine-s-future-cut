@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
 
 export interface Reservation {
   id: string;
@@ -223,6 +224,27 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
       if (error) {
         console.error('Error adding reservation:', error);
         throw error;
+      }
+
+      // Send email notification directly after successful reservation
+      try {
+        const dateStr = format(reservation.date, 'dd/MM/yyyy');
+        const timeStr = format(reservation.date, 'HH:mm');
+        
+        await supabase.functions.invoke('send-email-notification', {
+          body: {
+            type: 'new_booking',
+            client_name: reservation.clientName,
+            barber: reservation.barber,
+            services: reservation.services,
+            date: dateStr,
+            time: timeStr,
+          },
+        });
+        console.log('Email notification sent for new reservation');
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError);
+        // Don't throw - reservation was successful, email is secondary
       }
     } catch (error) {
       console.error('Error adding reservation:', error);
