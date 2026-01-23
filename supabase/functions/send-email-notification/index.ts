@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "https://esm.sh/resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -61,19 +60,46 @@ const handler = async (req: Request): Promise<Response> => {
       `;
     }
 
-    console.log("Sending email notification:", { type, client_name, barber, services, date, time });
+    console.log("Sending email notification via Brevo:", { type, client_name, barber, services, date, time });
 
-    const emailResponse = await resend.emails.send({
-      from: "Amine Barbershop <onboarding@resend.dev>",
-      to: ["beaziz022@gmail.com"],
-      subject,
-      html: htmlContent,
+    // Send email using Brevo API
+    const emailResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "api-key": BREVO_API_KEY || "",
+      },
+      body: JSON.stringify({
+        sender: {
+          name: "Amine Barbershop",
+          email: "no-reply@aminebarbershop.com",
+        },
+        to: [
+          {
+            email: "beaziz022@gmail.com",
+            name: "Admin",
+          },
+        ],
+        subject,
+        htmlContent,
+      }),
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    const responseData = await emailResponse.json();
+    
+    if (!emailResponse.ok) {
+      console.error("Brevo API error:", responseData);
+      return new Response(
+        JSON.stringify({ error: responseData }),
+        { status: emailResponse.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Email sent successfully via Brevo:", responseData);
 
     return new Response(
-      JSON.stringify({ success: true, data: emailResponse }),
+      JSON.stringify({ success: true, data: responseData }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {
