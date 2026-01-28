@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
-const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
+const MAILJET_API_KEY = Deno.env.get("MAILJET_API_KEY");
+const MAILJET_SECRET_KEY = Deno.env.get("MAILJET_SECRET_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -60,43 +61,46 @@ const handler = async (req: Request): Promise<Response> => {
       `;
     }
 
-    console.log("Sending email notification via Brevo:", { type, client_name, barber, services, date, time });
+    console.log("Sending email notification via Mailjet:", { type, client_name, barber, services, date, time });
 
-    // Send email using Brevo API
-    const emailResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
+    // Send email using Mailjet API v3.1
+    const emailResponse = await fetch("https://api.mailjet.com/v3.1/send", {
       method: "POST",
       headers: {
-        "Accept": "application/json",
         "Content-Type": "application/json",
-        "api-key": BREVO_API_KEY || "",
+        "Authorization": "Basic " + btoa(`${MAILJET_API_KEY}:${MAILJET_SECRET_KEY}`),
       },
       body: JSON.stringify({
-        sender: {
-          name: "Amine Barbershop",
-          email: "beaziz022@gmail.com",
-        },
-        to: [
+        Messages: [
           {
-            email: "beaziz022@gmail.com",
-            name: "Admin",
+            From: {
+              Email: "beaziz022@gmail.com",
+              Name: "Amine Barbershop",
+            },
+            To: [
+              {
+                Email: "beaziz022@gmail.com",
+                Name: "Admin",
+              },
+            ],
+            Subject: subject,
+            HTMLPart: htmlContent,
           },
         ],
-        subject,
-        htmlContent,
       }),
     });
 
     const responseData = await emailResponse.json();
     
     if (!emailResponse.ok) {
-      console.error("Brevo API error:", responseData);
+      console.error("Mailjet API error:", responseData);
       return new Response(
         JSON.stringify({ error: responseData }),
         { status: emailResponse.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("Email sent successfully via Brevo:", responseData);
+    console.log("Email sent successfully via Mailjet:", responseData);
 
     return new Response(
       JSON.stringify({ success: true, data: responseData }),
