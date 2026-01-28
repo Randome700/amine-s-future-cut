@@ -31,11 +31,23 @@ const handler = async (req: Request): Promise<Response> => {
     let subject: string;
     let htmlContent: string;
     
+    // Get current time in France timezone
+    const now = new Date();
+    const currentTime = now.toLocaleString('fr-FR', { 
+      timeZone: 'Europe/Paris',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
     if (type === "new_booking") {
       subject = `✂️ Nouvelle Réservation - ${client_name}`;
       htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #2d3748;">✂️ Nouvelle Réservation</h1>
+          <p style="font-size: 16px; color: #4a5568;">Une nouvelle réservation a été ajoutée à ce moment: <strong>${currentTime}</strong></p>
           <div style="background-color: #f7fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 10px 0;"><strong>👤 Client:</strong> ${client_name}</p>
             <p style="margin: 10px 0;"><strong>💈 Coiffeur:</strong> ${barber}</p>
@@ -50,6 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
       htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #e53e3e;">❌ Réservation Annulée</h1>
+          <p style="font-size: 16px; color: #4a5568;">Une réservation a été annulée à ce moment: <strong>${currentTime}</strong></p>
           <div style="background-color: #fff5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 10px 0;"><strong>👤 Client:</strong> ${client_name}</p>
             <p style="margin: 10px 0;"><strong>💈 Coiffeur:</strong> ${barber}</p>
@@ -79,7 +92,7 @@ const handler = async (req: Request): Promise<Response> => {
             },
             To: [
               {
-                Email: "beaziz022@gmail.com",
+                Email: "beslayerking022@gmail.com",
                 Name: "Admin",
               },
             ],
