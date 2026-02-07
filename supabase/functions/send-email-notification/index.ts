@@ -2,6 +2,11 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const MAILJET_API_KEY = Deno.env.get("MAILJET_API_KEY");
 const MAILJET_SECRET_KEY = Deno.env.get("MAILJET_SECRET_KEY");
+const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
+const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
+const TWILIO_WHATSAPP_FROM = Deno.env.get("TWILIO_WHATSAPP_FROM") || "whatsapp:+14155238886";
+
+const ADMIN_WHATSAPP_NUMBER = "whatsapp:+21622626249";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,6 +22,42 @@ interface NotificationRequest {
   time: string;
 }
 
+const sendWhatsAppMessage = async (message: string): Promise<void> => {
+  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN) {
+    console.error("Twilio credentials not configured");
+    return;
+  }
+
+  const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
+  
+  const body = new URLSearchParams({
+    From: TWILIO_WHATSAPP_FROM,
+    To: ADMIN_WHATSAPP_NUMBER,
+    Body: message,
+  });
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": "Basic " + btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`),
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: body.toString(),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      console.error("Twilio WhatsApp error:", data);
+    } else {
+      console.log("WhatsApp message sent successfully:", data.sid);
+    }
+  } catch (error) {
+    console.error("Error sending WhatsApp message:", error);
+  }
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -30,6 +71,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     let subject: string;
     let htmlContent: string;
+    let whatsappMessage: string;
     
     // Get current time in France timezone
     const now = new Date();
@@ -57,6 +99,15 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
         </div>
       `;
+      whatsappMessage = `✂️ *Nouvelle Réservation*
+
+Une nouvelle réservation a été ajoutée à ce moment: ${currentTime}
+
+👤 *Client:* ${client_name}
+💈 *Coiffeur:* ${barber}
+✂️ *Service(s):* ${servicesList}
+📅 *Date:* ${date}
+🕐 *Heure:* ${time}`;
     } else {
       subject = `❌ Annulation - ${client_name}`;
       htmlContent = `
@@ -72,44 +123,58 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
         </div>
       `;
+      whatsappMessage = `❌ *Réservation Annulée*
+
+Une réservation a été annulée à ce moment: ${currentTime}
+
+👤 *Client:* ${client_name}
+💈 *Coiffeur:* ${barber}
+✂️ *Service(s):* ${servicesList}
+📅 *Date:* ${date}
+🕐 *Heure:* ${time}`;
     }
 
-    console.log("Sending email notification via Mailjet:", { type, client_name, barber, services, date, time });
+    console.log("Sending notifications:", { type, client_name, barber, services, date, time });
 
-    // Send email using Mailjet API v3.1
-    const emailResponse = await fetch("https://api.mailjet.com/v3.1/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Basic " + btoa(`${MAILJET_API_KEY}:${MAILJET_SECRET_KEY}`),
-      },
-      body: JSON.stringify({
-        Messages: [
-          {
-            From: {
-              Email: "beaziz022@gmail.com",
-              Name: "Amine Barbershop",
-            },
-            To: [
-              {
-                Email: "beslayerking022@gmail.com",
-                Name: "Admin",
+    // Send both email and WhatsApp notifications in parallel
+    const [emailResult, _whatsappResult] = await Promise.all([
+      // Send email using Mailjet API v3.1
+      fetch("https://api.mailjet.com/v3.1/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Basic " + btoa(`${MAILJET_API_KEY}:${MAILJET_SECRET_KEY}`),
+        },
+        body: JSON.stringify({
+          Messages: [
+            {
+              From: {
+                Email: "beaziz022@gmail.com",
+                Name: "Amine Barbershop",
               },
-            ],
-            Subject: subject,
-            HTMLPart: htmlContent,
-          },
-        ],
+              To: [
+                {
+                  Email: "beslayerking022@gmail.com",
+                  Name: "Admin",
+                },
+              ],
+              Subject: subject,
+              HTMLPart: htmlContent,
+            },
+          ],
+        }),
       }),
-    });
+      // Send WhatsApp message
+      sendWhatsAppMessage(whatsappMessage),
+    ]);
 
-    const responseData = await emailResponse.json();
+    const responseData = await emailResult.json();
     
-    if (!emailResponse.ok) {
+    if (!emailResult.ok) {
       console.error("Mailjet API error:", responseData);
       return new Response(
         JSON.stringify({ error: responseData }),
-        { status: emailResponse.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: emailResult.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
