@@ -521,18 +521,28 @@ const ReservationPage = () => {
                     <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary text-sm">5</span>
                     {t('reservation.selectTime')}
                   </Label>
-                  <Select value={selectedTime} onValueChange={setSelectedTime}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('reservation.selectTime')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {timeSlots.map((time) => (
-                        <SelectItem key={time} value={time}>
-                          {time}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Select value={selectedHour} onValueChange={setSelectedHour}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('reservation.hour') || 'Heure'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {hourOptions.map((h) => (
+                          <SelectItem key={h} value={h}>{h} h</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={selectedMinute} onValueChange={setSelectedMinute}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('reservation.minute') || 'Minute'} />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-64">
+                        {minuteOptions.map((m) => (
+                          <SelectItem key={m} value={m}>{m} min</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 {/* Phone Number */}
