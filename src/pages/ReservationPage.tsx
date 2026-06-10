@@ -44,7 +44,14 @@ const ReservationPage = () => {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedBarber, setSelectedBarber] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [selectedTime, setSelectedTime] = useState<string>('');
+  const [selectedHour, setSelectedHour] = useState<string>('');
+  const [selectedMinute, setSelectedMinute] = useState<string>('');
+  const selectedTime = selectedHour && selectedMinute ? `${selectedHour}:${selectedMinute}` : '';
+  const setSelectedTime = (val: string) => {
+    if (!val) { setSelectedHour(''); setSelectedMinute(''); return; }
+    const [h, m] = val.split(':');
+    setSelectedHour(h || ''); setSelectedMinute(m || '');
+  };
   const [phone, setPhone] = useState('');
   const [clientName, setClientName] = useState('');
   const [error, setError] = useState<string | null>(null);
