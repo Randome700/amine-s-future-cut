@@ -48,7 +48,7 @@ const ChairStatusDisplay = () => {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">{t('reservation.chairs')}</h3>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         {chairs.map((chair) => (
           <ChairCard key={chair.id} chair={chair} />
         ))}
