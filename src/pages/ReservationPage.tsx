@@ -33,11 +33,8 @@ const services: Service[] = [
 
 const barbers = ['Amine', 'Motez', 'Rayan', 'Anas'];
 
-const timeSlots = Array.from({ length: 26 }, (_, i) => {
-  const hour = Math.floor(i / 2) + 9;
-  const minute = i % 2 === 0 ? '00' : '30';
-  return `${hour.toString().padStart(2, '0')}:${minute}`;
-}).filter((_, i) => i < 26); // 09:00 to 21:30
+const hourOptions = Array.from({ length: 13 }, (_, i) => (i + 9).toString().padStart(2, '0')); // 09..21
+const minuteOptions = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 
 const ReservationPage = () => {
   const { t, language } = useLanguage();
