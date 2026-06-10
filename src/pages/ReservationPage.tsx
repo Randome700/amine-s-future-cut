@@ -31,7 +31,7 @@ const services: Service[] = [
   { id: 'protein', labelKey: 'reservation.protein', duration: 90, price: null, isPricePrivate: true },
 ];
 
-const barbers = ['Amine', 'Motez', 'Rayan', 'Anas'];
+const barbers = ['Amine', 'Rayen', 'Rayan', 'Anas'];
 
 const hourOptions = Array.from({ length: 13 }, (_, i) => (i + 9).toString().padStart(2, '0')); // 09..21
 const minuteOptions = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
