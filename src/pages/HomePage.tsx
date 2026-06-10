@@ -9,8 +9,7 @@ import { toast } from 'sonner';
 
 const barbers = [
   { name: 'Amine', role: 'Master Barber', image: '👨‍🦱' },
-  { name: 'Rayen', role: 'Senior Stylist', image: '👨‍🦰' },
-  { name: 'Rayan', role: 'Barber', image: '🧔' },
+  { name: 'Rayan', role: 'Senior Stylist', image: '👨‍🦰' },
   { name: 'Anas', role: 'Barber', image: '🧑‍🦱' },
 ];
 
@@ -156,7 +155,7 @@ const HomePage = () => {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('home.barbers')}</h2>
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
               <Users className="h-5 w-5" />
-              <span>4 {t('home.barbers').toLowerCase()}</span>
+              <span>3 {t('home.barbers').toLowerCase()}</span>
             </div>
           </div>
 
