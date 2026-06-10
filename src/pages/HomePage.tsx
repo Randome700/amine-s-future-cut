@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 
 const barbers = [
   { name: 'Amine', role: 'Master Barber', image: '👨‍🦱' },
-  { name: 'Motez', role: 'Senior Stylist', image: '👨‍🦰' },
+  { name: 'Rayen', role: 'Senior Stylist', image: '👨‍🦰' },
   { name: 'Rayan', role: 'Barber', image: '🧔' },
   { name: 'Anas', role: 'Barber', image: '🧑‍🦱' },
 ];
