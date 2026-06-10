@@ -6,7 +6,7 @@ const Footer = () => {
   const { t } = useLanguage();
 
   const socialLinks = [
-    { name: 'Taz', url: 'https://www.instagram.com/taz_coiff_/', handle: '@taz_coiff_' },
+    { name: 'Rayen', url: 'https://www.instagram.com/rayen_coiff13', handle: '@rayen_coiff13' },
     { name: 'Anas', url: 'https://www.instagram.com/melkki_anas?igsh=MTV5dWs4MDNxaTNodg==', handle: '@melkki_anas' },
     { name: 'Amine', url: 'https://www.instagram.com/coif_amin?igsh=MWZjZnh2aTU4a3Qweg==', handle: '@coif_amin' },
   ];

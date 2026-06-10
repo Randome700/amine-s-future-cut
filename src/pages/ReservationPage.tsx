@@ -33,11 +33,8 @@ const services: Service[] = [
 
 const barbers = ['Amine', 'Motez', 'Rayan', 'Anas'];
 
-const timeSlots = Array.from({ length: 26 }, (_, i) => {
-  const hour = Math.floor(i / 2) + 9;
-  const minute = i % 2 === 0 ? '00' : '30';
-  return `${hour.toString().padStart(2, '0')}:${minute}`;
-}).filter((_, i) => i < 26); // 09:00 to 21:30
+const hourOptions = Array.from({ length: 13 }, (_, i) => (i + 9).toString().padStart(2, '0')); // 09..21
+const minuteOptions = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 
 const ReservationPage = () => {
   const { t, language } = useLanguage();
@@ -47,7 +44,14 @@ const ReservationPage = () => {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedBarber, setSelectedBarber] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [selectedTime, setSelectedTime] = useState<string>('');
+  const [selectedHour, setSelectedHour] = useState<string>('');
+  const [selectedMinute, setSelectedMinute] = useState<string>('');
+  const selectedTime = selectedHour && selectedMinute ? `${selectedHour}:${selectedMinute}` : '';
+  const setSelectedTime = (val: string) => {
+    if (!val) { setSelectedHour(''); setSelectedMinute(''); return; }
+    const [h, m] = val.split(':');
+    setSelectedHour(h || ''); setSelectedMinute(m || '');
+  };
   const [phone, setPhone] = useState('');
   const [clientName, setClientName] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -517,18 +521,28 @@ const ReservationPage = () => {
                     <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary text-sm">5</span>
                     {t('reservation.selectTime')}
                   </Label>
-                  <Select value={selectedTime} onValueChange={setSelectedTime}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('reservation.selectTime')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {timeSlots.map((time) => (
-                        <SelectItem key={time} value={time}>
-                          {time}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Select value={selectedHour} onValueChange={setSelectedHour}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('reservation.hour') || 'Heure'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {hourOptions.map((h) => (
+                          <SelectItem key={h} value={h}>{h} h</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={selectedMinute} onValueChange={setSelectedMinute}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('reservation.minute') || 'Minute'} />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-64">
+                        {minuteOptions.map((m) => (
+                          <SelectItem key={m} value={m}>{m} min</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 {/* Phone Number */}
