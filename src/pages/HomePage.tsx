@@ -19,6 +19,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const { reservations, cancelReservation } = useReservation();
   const [cancelPhone, setCancelPhone] = useState('');
+  const [cancelName, setCancelName] = useState('');
   const [isCancelling, setIsCancelling] = useState(false);
 
   const handleBarberClick = (barberName: string) => {
@@ -30,9 +31,16 @@ const HomePage = () => {
       toast.error(t('reservation.cancel.phoneRequired'));
       return;
     }
+    if (!cancelName.trim()) {
+      toast.error(t('reservation.cancel.nameRequired'));
+      return;
+    }
 
     const reservation = reservations.find(
-      (r) => r.phone === cancelPhone && (r.status === 'pending' || r.status === 'confirmed')
+      (r) =>
+        r.phone === cancelPhone.trim() &&
+        r.client_name.trim().toLowerCase() === cancelName.trim().toLowerCase() &&
+        (r.status === 'pending' || r.status === 'confirmed')
     );
 
     if (!reservation) {
@@ -47,6 +55,7 @@ const HomePage = () => {
     if (result.success) {
       toast.success(t('reservation.cancel.success'));
       setCancelPhone('');
+      setCancelName('');
     } else {
       toast.error(t('reservation.cancel.error'));
     }
