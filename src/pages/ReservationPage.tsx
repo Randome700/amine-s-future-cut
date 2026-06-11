@@ -38,7 +38,7 @@ const minuteOptions = Array.from({ length: 60 }, (_, i) => i.toString().padStart
 
 const ReservationPage = () => {
   const { t, language } = useLanguage();
-  const { addReservation, hasActiveReservation, getWaitTime, chairs, isBarberBusyAt, getAvailableBarberAt, cancelReservation, reservations, isPhoneBanned } = useReservation();
+  const { addReservation, hasActiveReservation, getWaitTime, chairs, isBarberBusyAt, getAvailableBarberAt, cancelReservation, reservations } = useReservation();
   const [searchParams] = useSearchParams();
 
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -114,14 +114,9 @@ const ReservationPage = () => {
     dateTime.setHours(hours, minutes, 0, 0);
 
     const now = new Date();
-    const minTime = new Date(now.getTime() + 30 * 60 * 1000);
 
     if (dateTime < now) {
       return t('reservation.error.past');
-    }
-
-    if (dateTime < minTime) {
-      return t('reservation.error.soon');
     }
 
     if (hours < 9 || hours >= 22) {
@@ -198,12 +193,6 @@ const ReservationPage = () => {
       return;
     }
 
-    // Check if phone is banned
-    const banned = await isPhoneBanned(phone);
-    if (banned) {
-      setError(t('reservation.error.banned'));
-      return;
-    }
 
     if (hasActiveReservation(phone)) {
       setError(t('reservation.error.existing'));
@@ -295,9 +284,7 @@ const ReservationPage = () => {
       setCancelPhone('');
       setShowCancelForm(false);
     } else {
-      if (result.error === 'banned') {
-        setCancelError(t('reservation.cancel.banned'));
-      } else if (result.error === 'past_reservation') {
+      if (result.error === 'past_reservation') {
         setCancelError(t('reservation.cancel.pastReservation'));
       } else {
         setCancelError(t('reservation.cancel.error'));
