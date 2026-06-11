@@ -114,14 +114,9 @@ const ReservationPage = () => {
     dateTime.setHours(hours, minutes, 0, 0);
 
     const now = new Date();
-    const minTime = new Date(now.getTime() + 30 * 60 * 1000);
 
     if (dateTime < now) {
       return t('reservation.error.past');
-    }
-
-    if (dateTime < minTime) {
-      return t('reservation.error.soon');
     }
 
     if (hours < 9 || hours >= 22) {
