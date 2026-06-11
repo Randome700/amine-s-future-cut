@@ -59,6 +59,7 @@ const ReservationPage = () => {
   const [autoSwitchedBarber, setAutoSwitchedBarber] = useState<string>('');
   const [suggestedTime, setSuggestedTime] = useState<string | null>(null);
   const [cancelPhone, setCancelPhone] = useState('');
+  const [cancelName, setCancelName] = useState('');
   const [showCancelForm, setShowCancelForm] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
