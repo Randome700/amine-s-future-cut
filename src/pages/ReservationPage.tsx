@@ -59,6 +59,7 @@ const ReservationPage = () => {
   const [autoSwitchedBarber, setAutoSwitchedBarber] = useState<string>('');
   const [suggestedTime, setSuggestedTime] = useState<string | null>(null);
   const [cancelPhone, setCancelPhone] = useState('');
+  const [cancelName, setCancelName] = useState('');
   const [showCancelForm, setShowCancelForm] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
@@ -267,9 +268,17 @@ const ReservationPage = () => {
       return;
     }
 
-    // Find the reservation for this phone
+    if (!cancelName.trim()) {
+      setCancelError(t('reservation.cancel.nameRequired'));
+      return;
+    }
+
+    // Find the reservation matching phone AND name
     const reservation = reservations.find(
-      (r) => r.phone === cancelPhone && (r.status === 'pending' || r.status === 'confirmed')
+      (r) =>
+        r.phone === cancelPhone.trim() &&
+        r.clientName.trim().toLowerCase() === cancelName.trim().toLowerCase() &&
+        (r.status === 'pending' || r.status === 'confirmed')
     );
 
     if (!reservation) {
@@ -282,6 +291,7 @@ const ReservationPage = () => {
     if (result.success) {
       toast.success(t('reservation.cancel.success'));
       setCancelPhone('');
+      setCancelName('');
       setShowCancelForm(false);
     } else {
       if (result.error === 'past_reservation') {
@@ -327,17 +337,23 @@ const ReservationPage = () => {
                   <p className="text-sm text-muted-foreground">
                     {t('reservation.cancel.warning')}
                   </p>
-                  <div className="flex gap-2">
+                  <div className="space-y-2">
                     <Input
                       type="tel"
                       value={cancelPhone}
                       onChange={(e) => setCancelPhone(e.target.value)}
                       placeholder={t('reservation.phonePlaceholder')}
-                      className="flex-1"
+                    />
+                    <Input
+                      type="text"
+                      value={cancelName}
+                      onChange={(e) => setCancelName(e.target.value)}
+                      placeholder={t('reservation.cancel.namePlaceholder')}
                     />
                     <Button
                       onClick={handleCancelReservation}
                       variant="destructive"
+                      className="w-full"
                     >
                       {t('reservation.cancel.confirm')}
                     </Button>
