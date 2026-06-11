@@ -337,17 +337,23 @@ const ReservationPage = () => {
                   <p className="text-sm text-muted-foreground">
                     {t('reservation.cancel.warning')}
                   </p>
-                  <div className="flex gap-2">
+                  <div className="space-y-2">
                     <Input
                       type="tel"
                       value={cancelPhone}
                       onChange={(e) => setCancelPhone(e.target.value)}
                       placeholder={t('reservation.phonePlaceholder')}
-                      className="flex-1"
+                    />
+                    <Input
+                      type="text"
+                      value={cancelName}
+                      onChange={(e) => setCancelName(e.target.value)}
+                      placeholder={t('reservation.cancel.namePlaceholder')}
                     />
                     <Button
                       onClick={handleCancelReservation}
                       variant="destructive"
+                      className="w-full"
                     >
                       {t('reservation.cancel.confirm')}
                     </Button>
