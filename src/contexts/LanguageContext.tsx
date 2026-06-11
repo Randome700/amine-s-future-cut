@@ -74,8 +74,10 @@ const translations: Record<Language, Record<string, string>> = {
     'reservation.cancel.pastReservation': 'Vous ne pouvez pas annuler une réservation passée.',
     'reservation.cancel.error': 'Erreur lors de l\'annulation.',
     'reservation.cancel.phoneRequired': 'Veuillez entrer votre numéro de téléphone.',
+    'reservation.cancel.nameRequired': 'Veuillez entrer le nom utilisé lors de la réservation.',
+    'reservation.cancel.namePlaceholder': 'Nom de la réservation',
     'reservation.cancel.button': 'Annuler',
-    'reservation.cancel.description': 'Entrez votre numéro pour annuler votre réservation',
+    'reservation.cancel.description': 'Entrez votre numéro et votre nom pour annuler votre réservation',
     
     // Shop
     'shop.title': 'Boutique',
