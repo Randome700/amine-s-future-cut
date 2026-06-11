@@ -40,7 +40,7 @@ interface ReservationContextType {
   todayEarnings: number;
 }
 
-const barbers = ['Amine', 'Rayan', 'Anas'];
+const barbers = ['Amine', 'Rayan', 'Anas', 'Chawki'];
 
 const ReservationContext = createContext<ReservationContextType | undefined>(undefined);
 

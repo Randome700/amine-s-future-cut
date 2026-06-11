@@ -11,6 +11,7 @@ const barbers = [
   { name: 'Amine', role: 'Master Barber', image: '👨‍🦱' },
   { name: 'Rayan', role: 'Senior Stylist', image: '👨‍🦰' },
   { name: 'Anas', role: 'Barber', image: '🧑‍🦱' },
+  { name: 'Chawki', role: 'Barber', image: '🧔' },
 ];
 
 const HomePage = () => {
@@ -155,11 +156,11 @@ const HomePage = () => {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('home.barbers')}</h2>
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
               <Users className="h-5 w-5" />
-              <span>3 {t('home.barbers').toLowerCase()}</span>
+              <span>4 {t('home.barbers').toLowerCase()}</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {barbers.map((barber, index) => (
               <button 
                 key={barber.name}
