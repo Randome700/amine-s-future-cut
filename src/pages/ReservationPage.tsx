@@ -38,7 +38,7 @@ const minuteOptions = Array.from({ length: 60 }, (_, i) => i.toString().padStart
 
 const ReservationPage = () => {
   const { t, language } = useLanguage();
-  const { addReservation, hasActiveReservation, getWaitTime, chairs, isBarberBusyAt, getAvailableBarberAt, cancelReservation, reservations, isPhoneBanned } = useReservation();
+  const { addReservation, hasActiveReservation, getWaitTime, chairs, isBarberBusyAt, getAvailableBarberAt, cancelReservation, reservations } = useReservation();
   const [searchParams] = useSearchParams();
 
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -193,12 +193,6 @@ const ReservationPage = () => {
       return;
     }
 
-    // Check if phone is banned
-    const banned = await isPhoneBanned(phone);
-    if (banned) {
-      setError(t('reservation.error.banned'));
-      return;
-    }
 
     if (hasActiveReservation(phone)) {
       setError(t('reservation.error.existing'));
