@@ -39,7 +39,7 @@ const HomePage = () => {
     const reservation = reservations.find(
       (r) =>
         r.phone === cancelPhone.trim() &&
-        r.client_name.trim().toLowerCase() === cancelName.trim().toLowerCase() &&
+        r.clientName.trim().toLowerCase() === cancelName.trim().toLowerCase() &&
         (r.status === 'pending' || r.status === 'confirmed')
     );
 
