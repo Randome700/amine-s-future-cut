@@ -268,9 +268,17 @@ const ReservationPage = () => {
       return;
     }
 
-    // Find the reservation for this phone
+    if (!cancelName.trim()) {
+      setCancelError(t('reservation.cancel.nameRequired'));
+      return;
+    }
+
+    // Find the reservation matching phone AND name
     const reservation = reservations.find(
-      (r) => r.phone === cancelPhone && (r.status === 'pending' || r.status === 'confirmed')
+      (r) =>
+        r.phone === cancelPhone.trim() &&
+        r.clientName.trim().toLowerCase() === cancelName.trim().toLowerCase() &&
+        (r.status === 'pending' || r.status === 'confirmed')
     );
 
     if (!reservation) {
@@ -283,6 +291,7 @@ const ReservationPage = () => {
     if (result.success) {
       toast.success(t('reservation.cancel.success'));
       setCancelPhone('');
+      setCancelName('');
       setShowCancelForm(false);
     } else {
       if (result.error === 'past_reservation') {
