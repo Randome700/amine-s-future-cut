@@ -47,8 +47,6 @@ const HomePage = () => {
     if (result.success) {
       toast.success(t('reservation.cancel.success'));
       setCancelPhone('');
-    } else if (result.error === 'banned') {
-      toast.error(t('reservation.cancel.banned'));
     } else {
       toast.error(t('reservation.cancel.error'));
     }

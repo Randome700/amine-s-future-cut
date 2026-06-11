@@ -284,9 +284,7 @@ const ReservationPage = () => {
       setCancelPhone('');
       setShowCancelForm(false);
     } else {
-      if (result.error === 'banned') {
-        setCancelError(t('reservation.cancel.banned'));
-      } else if (result.error === 'past_reservation') {
+      if (result.error === 'past_reservation') {
         setCancelError(t('reservation.cancel.pastReservation'));
       } else {
         setCancelError(t('reservation.cancel.error'));
