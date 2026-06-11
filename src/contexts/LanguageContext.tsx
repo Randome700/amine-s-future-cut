@@ -165,8 +165,10 @@ const translations: Record<Language, Record<string, string>> = {
     'reservation.cancel.pastReservation': 'لا يمكنك إلغاء حجز سابق.',
     'reservation.cancel.error': 'خطأ أثناء الإلغاء.',
     'reservation.cancel.phoneRequired': 'يرجى إدخال رقم هاتفك.',
+    'reservation.cancel.nameRequired': 'يرجى إدخال الاسم المستخدم في الحجز.',
+    'reservation.cancel.namePlaceholder': 'اسم الحجز',
     'reservation.cancel.button': 'إلغاء',
-    'reservation.cancel.description': 'أدخل رقمك لإلغاء حجزك',
+    'reservation.cancel.description': 'أدخل رقمك واسمك لإلغاء حجزك',
     
     // Shop
     'shop.title': 'المتجر',
