@@ -133,19 +133,24 @@ const HomePage = () => {
               </h3>
               <p className="text-sm text-muted-foreground mt-1">{t('reservation.cancel.description')}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="space-y-2">
               <Input
                 type="tel"
                 placeholder={t('reservation.phone')}
                 value={cancelPhone}
                 onChange={(e) => setCancelPhone(e.target.value)}
-                className="flex-1"
+              />
+              <Input
+                type="text"
+                placeholder={t('reservation.cancel.namePlaceholder')}
+                value={cancelName}
+                onChange={(e) => setCancelName(e.target.value)}
               />
               <Button
                 onClick={handleCancelReservation}
                 disabled={isCancelling}
                 variant="destructive"
-                className="whitespace-nowrap"
+                className="w-full"
               >
                 {isCancelling ? '...' : t('reservation.cancel.button')}
               </Button>
