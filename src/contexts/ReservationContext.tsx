@@ -103,14 +103,14 @@ export const ReservationProvider = ({ children }: { children: ReactNode }) => {
     
     for (const r of allReservations || []) {
       const reservationDate = new Date(r.reservation_date);
-      const serviceEndTime = new Date(reservationDate.getTime() + r.total_time * 60000);
-      const deleteAfterTime = new Date(serviceEndTime.getTime() + 30 * 60000); // 30 min after service ends
-      
-      // Delete if 30 min after service ends (for confirmed, completed, or pending reservations)
+      // Delete 20 minutes after the reservation time
+      const deleteAfterTime = new Date(reservationDate.getTime() + 20 * 60000);
+
       if (now >= deleteAfterTime) {
         idsToDelete.push(r.id);
         continue; // Skip other checks if already marked for deletion
       }
+
       
       // Also delete if reservation date was from a previous day (end of day cleanup)
       const reservationDay = new Date(reservationDate);
