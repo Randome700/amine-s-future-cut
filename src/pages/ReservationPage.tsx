@@ -394,10 +394,8 @@ const ReservationPage = () => {
                       />
                       <div>
                         <p className="font-medium">{t(service.labelKey)}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {service.duration} {t('reservation.minutes')}
-                        </p>
                       </div>
+
                     </div>
                     <span className="font-semibold">
                       {service.isPricePrivate
