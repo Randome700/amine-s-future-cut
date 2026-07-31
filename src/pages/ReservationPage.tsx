@@ -409,10 +409,6 @@ const ReservationPage = () => {
               {/* Totals */}
               {selectedServices.length > 0 && (
                 <div className="mt-6 p-4 rounded-xl bg-muted/50 space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t('reservation.time')}</span>
-                    <span className="font-medium">{totalTime} {t('reservation.minutes')}</span>
-                  </div>
                   {!hasPrivateService && (
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('reservation.price')}</span>
