@@ -33,7 +33,7 @@ const services: Service[] = [
 
 const barbers = ['Amine', 'Rayan', 'Anas', 'Chawki'];
 
-const hourOptions = Array.from({ length: 13 }, (_, i) => (i + 9).toString().padStart(2, '0')); // 09..21
+const hourOptions = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')); // 00..23
 const minuteOptions = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 
 const ReservationPage = () => {
