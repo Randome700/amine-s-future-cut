@@ -120,9 +120,9 @@ const ReservationPage = () => {
       return t('reservation.error.past');
     }
 
-    if (hours < 9 || hours >= 22) {
-      return t('reservation.error.closed');
-    }
+    return null;
+  };
+
 
     return null;
   };
