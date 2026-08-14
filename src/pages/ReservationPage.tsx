@@ -38,7 +38,7 @@ const minuteOptions = Array.from({ length: 60 }, (_, i) => i.toString().padStart
 
 const ReservationPage = () => {
   const { t, language } = useLanguage();
-  const { addReservation, hasActiveReservation, getWaitTime, chairs, isBarberBusyAt, getAvailableBarberAt, cancelReservation, reservations } = useReservation();
+  const { addReservation, getWaitTime, chairs, isBarberBusyAt, getAvailableBarberAt, cancelReservation, reservations } = useReservation();
   const [searchParams] = useSearchParams();
 
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -120,10 +120,6 @@ const ReservationPage = () => {
       return t('reservation.error.past');
     }
 
-    if (hours < 9 || hours >= 22) {
-      return t('reservation.error.closed');
-    }
-
     return null;
   };
 
@@ -136,17 +132,15 @@ const ReservationPage = () => {
       const hours = checkTime.getHours();
       const minutes = checkTime.getMinutes();
       
-      // Only check during opening hours
-      if (hours >= 9 && hours < 22) {
-        for (const barber of barbers) {
-          if (!isBarberBusyAt(barber, checkTime, duration)) {
-            return {
-              time: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`,
-              barber
-            };
-          }
+      for (const barber of barbers) {
+        if (!isBarberBusyAt(barber, checkTime, duration)) {
+          return {
+            time: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`,
+            barber
+          };
         }
       }
+
       
       // Add 30 minutes
       checkTime.setMinutes(checkTime.getMinutes() + 30);
@@ -195,10 +189,6 @@ const ReservationPage = () => {
     }
 
 
-    if (hasActiveReservation(phone)) {
-      setError(t('reservation.error.existing'));
-      return;
-    }
 
     const [hours, minutes] = selectedTime.split(':').map(Number);
     const dateTime = new Date(selectedDate);
