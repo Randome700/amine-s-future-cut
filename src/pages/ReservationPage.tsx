@@ -38,7 +38,7 @@ const minuteOptions = Array.from({ length: 60 }, (_, i) => i.toString().padStart
 
 const ReservationPage = () => {
   const { t, language } = useLanguage();
-  const { addReservation, hasActiveReservation, getWaitTime, chairs, isBarberBusyAt, getAvailableBarberAt, cancelReservation, reservations } = useReservation();
+  const { addReservation, getWaitTime, chairs, isBarberBusyAt, getAvailableBarberAt, cancelReservation, reservations } = useReservation();
   const [searchParams] = useSearchParams();
 
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
