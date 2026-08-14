@@ -132,17 +132,15 @@ const ReservationPage = () => {
       const hours = checkTime.getHours();
       const minutes = checkTime.getMinutes();
       
-      // Only check during opening hours
-      if (hours >= 9 && hours < 22) {
-        for (const barber of barbers) {
-          if (!isBarberBusyAt(barber, checkTime, duration)) {
-            return {
-              time: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`,
-              barber
-            };
-          }
+      for (const barber of barbers) {
+        if (!isBarberBusyAt(barber, checkTime, duration)) {
+          return {
+            time: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`,
+            barber
+          };
         }
       }
+
       
       // Add 30 minutes
       checkTime.setMinutes(checkTime.getMinutes() + 30);
