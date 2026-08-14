@@ -123,10 +123,6 @@ const ReservationPage = () => {
     return null;
   };
 
-
-    return null;
-  };
-
   // Find next available time slot for any barber
   const findNextAvailableTime = (startDateTime: Date, duration: number): { time: string; barber: string } | null => {
     const checkTime = new Date(startDateTime);
