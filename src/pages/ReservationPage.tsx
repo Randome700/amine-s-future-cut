@@ -189,10 +189,6 @@ const ReservationPage = () => {
     }
 
 
-    if (hasActiveReservation(phone)) {
-      setError(t('reservation.error.existing'));
-      return;
-    }
 
     const [hours, minutes] = selectedTime.split(':').map(Number);
     const dateTime = new Date(selectedDate);
